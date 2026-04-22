@@ -3,11 +3,14 @@
 namespace App\Filament\Resources\Sessions\Tables;
 
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\Action;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Resources\SessionResource;
 
 class SessionsTable
 {
@@ -54,7 +57,17 @@ class SessionsTable
                 ->label('Filtrar por Sala'),
             ])
             ->recordActions([
-                EditAction::make(),
+                Action::make('ver_tickets')
+                    ->label('Entradas')
+                    ->icon('heroicon-o-ticket')
+                    ->color('success') // Lo ponemos verde para que llame la atención
+                    
+                    // El toque Pro: Mostrar cuántas entradas pagadas hay
+                    ->badge(fn ($record) => $record->tickets()->where('status', 'paid')->count())
+                    ->url(fn ($record) => route('filament.admin.resources.sessions.tickets', ['record' => $record])),
+                    // Al hacer clic, le llevamos a la página de edición de esa sesión específica
+                DeleteAction::make(),
+                EditAction::make()
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

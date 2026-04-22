@@ -18,6 +18,11 @@ return new class extends Migration
             $table->text('synopsis')->nullable(); // Guardamos el texto largo
             $table->string('poster_path')->nullable(); // Guardamos la ruta: /abc.jpg
             $table->integer('runtime')->nullable();
+            $table->string('generos')->nullable();
+            $table->string('productora')->nullable();
+            $table->string('director')->nullable();
+            $table->string('backdrop_path')->nullable();
+
             $table->boolean('is_active')->default(true); // Para saber si está en cartelera
             $table->timestamps();
         });

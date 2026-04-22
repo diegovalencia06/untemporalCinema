@@ -1,0 +1,71 @@
+import defaultTheme from 'tailwindcss/defaultTheme';
+
+/** @type {import('tailwindcss').Config} */
+export default {
+    darkMode: 'class',
+    content: [
+        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
+        './storage/framework/views/*.php',
+        './resources/**/*.blade.php',
+        './resources/**/*.js',
+        './resources/**/*.vue', // MUY IMPORTANTE QUE ESTÉ VUE AQUÍ
+    ],
+    theme: {
+        extend: {
+            colors: {
+                "surface-bright": "#33394c",
+                "error": "#ffb4ab",
+                "on-background": "#dce1fb",
+                "surface-tint": "#ffb4ab",
+                "surface-container-lowest": "#070d1f",
+                "tertiary-container": "#0078b2",
+                "on-error": "#690005",
+                "on-primary": "#690005",
+                "on-secondary": "#552100",
+                "surface": "#0c1324",
+                "surface-variant": "#2e3447",
+                "on-tertiary-fixed-variant": "#004b71",
+                "primary": "#ffb4ab",
+                "on-tertiary": "#003450",
+                "on-primary-fixed-variant": "#93000b",
+                "primary-fixed-dim": "#ffb4ab",
+                "error-container": "#93000a",
+                "on-primary-container": "#fff6f5",
+                "inverse-primary": "#bf0715",
+                "on-surface-variant": "#e6bdb8",
+                "on-secondary-fixed": "#341100",
+                "inverse-on-surface": "#2a3043",
+                "surface-container": "#191f31",
+                "on-tertiary-container": "#f3f8ff",
+                "tertiary-fixed-dim": "#90cdff",
+                "tertiary": "#90cdff",
+                "surface-dim": "#0c1324",
+                "primary-fixed": "#ffdad6",
+                "on-secondary-fixed-variant": "#783200",
+                "secondary-fixed": "#ffdbca",
+                "secondary-container": "#ec6a06",
+                "primary-container": "#dc2626",
+                "on-primary-fixed": "#410002",
+                "on-error-container": "#ffdad6",
+                "outline-variant": "#5c403c",
+                "inverse-surface": "#dce1fb",
+                "on-surface": "#dce1fb",
+                "secondary": "#ffb690",
+                "surface-container-high": "#23293c",
+                "background": "#0c1324",
+                "on-secondary-container": "#4a1c00",
+                "surface-container-low": "#151b2d",
+                "tertiary-fixed": "#cbe6ff",
+                "surface-container-highest": "#2e3447",
+                "on-tertiary-fixed": "#001e30",
+                "secondary-fixed-dim": "#ffb690",
+                "outline": "#ac8884"
+            },
+            fontFamily: {
+                "headline": ["Manrope", ...defaultTheme.fontFamily.sans],
+                "body": ["Inter", ...defaultTheme.fontFamily.sans],
+            }
+        },
+    },
+    plugins: [],
+};

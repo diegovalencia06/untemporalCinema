@@ -72,6 +72,7 @@ class MovieForm
                         $response = Http::get("https://api.themoviedb.org/3/movie/{$state}", [
                             'api_key' => env('TMDB_API_KEY'),
                             'language' => 'es-ES',
+                            'append_to_response' => 'credits',
                         ]);
 
                         if ($response->successful()) {
@@ -82,6 +83,16 @@ class MovieForm
                             $set('synopsis', $movie['overview'] ?? null);
                             $set('poster_path', $movie['poster_path'] ?? null);
                             $set('runtime', $movie['runtime'] ?? null);
+
+                            $set('generos', isset($movie['genres']) ? collect($movie['genres'])->pluck('name')->implode(', ') : null);
+                            $set('productora', isset($movie['production_companies']) ? collect($movie['production_companies'])->pluck('name')->implode(', ') : null);
+                            
+                            $director = null;
+                            if (isset($movie['credits']['crew'])) {
+                                $director = collect($movie['credits']['crew'])->where('job', 'Director')->pluck('name')->implode(', ');
+                            }
+                            $set('director', $director);
+                            $set('backdrop_path', $movie['backdrop_path'] ?? null);
                         }
                     }),
 
@@ -90,6 +101,11 @@ class MovieForm
                 Hidden::make('synopsis'),
                 Hidden::make('poster_path'),
                 Hidden::make('runtime'),
+                Hidden::make('generos'),
+                Hidden::make('productora'),
+                Hidden::make('director'),
+                Hidden::make('backdrop_path'),
+
 
                 Toggle::make('is_active')
                     ->label('Activa en Cartelera')
