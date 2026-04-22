@@ -18,7 +18,7 @@ class MovieResource extends Resource
 {
     protected static ?string $model = Movie::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFilm;
 
     protected static ?string $recordTitleAttribute = 'name';
 

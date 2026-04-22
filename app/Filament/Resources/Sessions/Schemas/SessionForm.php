@@ -32,7 +32,6 @@ class SessionForm
                 Select::make('movie_id')
                     ->relationship('movie', 'title')
                     ->label('Película')
-                    ->searchable()
                     ->required()
                     ->live()
                     ->afterStateUpdated(function ($set, $get) {
