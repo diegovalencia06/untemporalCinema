@@ -29,6 +29,8 @@ return new class extends Migration
             
             // 6. Código único para el QR
             $table->string('qr_code')->unique();
+
+            $table->string('seat');
             
             // 7. Estado de la compra
             $table->enum('status', ['pending', 'paid', 'cancelled'])->default('pending');

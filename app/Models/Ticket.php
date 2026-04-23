@@ -11,7 +11,7 @@ class Ticket extends Model
     use HasFactory;
 
     protected $fillable = [
-        'session_id', 'user_id', 'buyer_email', 'row', 'column', 'price', 'qr_code', 'status'
+         'order_id', 'session_id', 'user_id', 'buyer_email', 'row', 'column', 'price', 'qr_code', 'status', 'seat',
     ];
 
     // Magia de Laravel: Generar un código único automáticamente antes de crear el ticket
@@ -33,5 +33,10 @@ class Ticket extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
     }
 }

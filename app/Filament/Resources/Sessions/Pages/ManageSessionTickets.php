@@ -65,8 +65,6 @@ class ManageSessionTickets extends ManageRelatedRecords
                 AssociateAction::make(),
             ])
             ->recordActions([
-                DissociateAction::make(),
-                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

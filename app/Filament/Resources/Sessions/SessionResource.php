@@ -6,6 +6,8 @@ use App\Filament\Resources\Sessions\Pages\CreateSession;
 use App\Filament\Resources\Sessions\Pages\EditSession;
 use App\Filament\Resources\Sessions\Pages\ListSessions;
 use App\Filament\Resources\Sessions\Pages\ManageSessionTickets;
+use App\Filament\Resources\Sessions\Pages\ManageSessionOrders;
+
 use App\Filament\Resources\Sessions\Schemas\SessionForm;
 use App\Filament\Resources\Sessions\Tables\SessionsTable;
 use App\Models\Session;
@@ -44,7 +46,9 @@ class SessionResource extends Resource
             'index' => ListSessions::route('/'),
             'create' => CreateSession::route('/create'),
             'edit' => EditSession::route('/{record}/edit'),
-            'tickets' => ManageSessionTickets::route('/{record}/tickets')
+            'tickets' => ManageSessionTickets::route('/{record}/tickets'),
+            'orders' => ManageSessionOrders::route('/{record}/orders')
+
         ];
     }
 }

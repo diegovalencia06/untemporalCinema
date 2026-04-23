@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3'; // <-- Añade esto
+// 1. IMPORTAMOS 'Head' AQUÍ
+import { Head, Link, usePage } from '@inertiajs/vue3'; 
+import MainLayout from '@/Layouts/MainLayout.vue';
 
 const props = defineProps({
     movies: Array,
@@ -31,37 +33,10 @@ const formatearHora = (fechaString) => {
 </script>
 
 <template>
-    <div class="bg-surface-dim text-on-surface font-body selection:bg-primary/30 min-h-screen pb-24">
-        
-        <header class="bg-[#0c1324]/70 backdrop-blur-xl font-headline fixed top-0 w-full z-50 border-b border-white/10 shadow-[0_8px_30px_rgb(220,38,38,0.1)]">
-            <div class="flex justify-between items-center w-full px-6 py-4 max-w-screen-2xl mx-auto">
-                <div class="text-2xl font-black tracking-tighter bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">LUMINOUS</div>
-                
-                <nav class="hidden md:flex items-center space-x-8 font-body">
-                    <a class="text-red-500 font-bold border-b-2 border-red-600 pb-1" href="#">Cartelera</a>
-                    <a class="text-slate-400 hover:text-slate-100 transition-colors" href="#">Ofertas</a>
-                </nav>
-                
-                <div class="flex items-center space-x-4">
-                    <button class="p-2 hover:bg-white/5 transition-all duration-300 rounded-full active:scale-95">
-                        <span class="material-symbols-outlined text-on-surface">search</span>
-                    </button>
-                    <Link v-if="!$page.props.auth.user" href="/login" class="p-2 hover:bg-white/5 transition-all duration-300 rounded-full active:scale-95 flex items-center gap-2 text-slate-400 hover:text-white">
-                        <span class="text-sm font-bold hidden md:block">Entrar</span>
-                        <span class="material-symbols-outlined text-on-surface">account_circle</span>
-                    </Link>
+    <Head title="Cartelera | Luminous" />
 
-                    <Link v-else href="/perfil" class="p-2 bg-white/5 hover:bg-white/10 transition-all duration-300 rounded-full active:scale-95 flex items-center gap-2 border border-white/10">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-red-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm">
-                            {{ $page.props.auth.user.name.charAt(0) }}
-                        </div>
-                        <span class="text-sm font-bold hidden md:block text-white">{{ $page.props.auth.user.name }}</span>
-                    </Link>
-                </div>
-            </div>
-        </header>
-
-        <main class="pt-24 pb-12 max-w-screen-2xl mx-auto px-6">
+    <MainLayout>
+        <div class="pt-24 pb-24 max-w-screen-2xl mx-auto px-6">
             
             <section class="mb-12">
                 <h2 class="font-headline text-3xl font-extrabold tracking-tight mb-6 text-on-surface md:text-center">Elige tu día</h2>
@@ -121,7 +96,7 @@ const formatearHora = (fechaString) => {
 
                 </div>
             </section>
-        </main>
+        </div>
 
         <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 pb-safe bg-[#0c1324]/90 backdrop-blur-2xl border-t border-white/5 shadow-[0_-10px_40px_rgba(220,38,38,0.15)] z-50 rounded-t-2xl">
             <button class="flex flex-col items-center justify-center text-red-500 bg-red-500/10 rounded-xl px-4 py-2 scale-110 transition-transform">
@@ -137,7 +112,7 @@ const formatearHora = (fechaString) => {
                 <span class="font-headline text-[10px] font-bold uppercase tracking-widest mt-1">Perfil</span>
             </button>
         </nav>
-    </div>
+    </MainLayout>
 </template>
 
 <style scoped>

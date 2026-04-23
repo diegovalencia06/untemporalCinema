@@ -31,4 +31,10 @@ class Session extends Model
     {
         return $this->hasMany(Ticket::class);
     }
+    
+    public function orders()
+    {
+        // Una sesión tiene muchos (hasMany) pedidos
+        return $this->hasMany(\App\Models\Order::class);
+    }
 }

@@ -18,7 +18,13 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/sesion/{id}/asientos', [MovieController::class, 'asientos'])->name('sesion.asientos');
 
+Route::post('/sesion/{id}/comprar', [App\Http\Controllers\MovieController::class, 'comprar'])->name('sesion.comprar');
+
 // Ruta para ver el detalle de una película
 Route::get('/pelicula/{movie}', [MovieController::class, 'show'])->name('pelicula.show');
+
+// Fíjate que le he quitado el /api/
+Route::get('/buscar-peliculas', [MovieController::class, 'search']);
+Route::post('/validar-cupon', [MovieController::class, 'validarCupon'])->name('cupon.validar');
 
 require __DIR__.'/auth.php';
