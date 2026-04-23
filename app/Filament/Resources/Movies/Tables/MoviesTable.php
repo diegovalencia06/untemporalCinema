@@ -45,7 +45,7 @@ class MoviesTable
 
                 // 4. Si está en cartelera (Muestra un check verde o una X roja)
                 IconColumn::make('is_active')
-                    ->label('En Cartelera')
+                    ->label('En Web')
                     ->boolean(),
                 ])
             ->filters([

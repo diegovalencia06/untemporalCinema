@@ -21,23 +21,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin Cine',
             'email' => 'admin@cinema.com',
             'password' => bcrypt('password'), // La contraseña será 'password'
-            'role' => 'admin',
-        ]);
-
-        // 2. Un Socio de prueba
-        User::factory()->create([
-            'name' => 'Socio VIP',
-            'email' => 'socio@cinema.com',
-            'password' => bcrypt('password'),
-            'role' => 'socio',
-        ]);
-
-        // 3. Un Usuario normal de prueba
-        User::factory()->create([
-            'name' => 'Usuario Normal',
-            'email' => 'usuario@cinema.com',
-            'password' => bcrypt('password'),
-            'role' => 'user',
+            'is_admin' => true,
         ]);
     }
 }

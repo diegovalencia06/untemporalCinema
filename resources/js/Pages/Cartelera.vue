@@ -33,7 +33,7 @@ const formatearHora = (fechaString) => {
 </script>
 
 <template>
-    <Head title="Cartelera | Luminous" />
+    <Head title="Cartelera" />
 
     <MainLayout>
         <div class="pt-24 pb-24 max-w-screen-2xl mx-auto px-6">

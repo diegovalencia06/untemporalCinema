@@ -39,7 +39,7 @@ watch(searchQuery, async (newQuery) => {
             <div class="flex justify-between items-center w-full px-6 py-4 max-w-screen-2xl mx-auto">
                 
                 <Link href="/" class="text-2xl font-black tracking-tighter bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
-                    LUMINOUS
+                    Untemporal Cinema
                 </Link>
                 
                 <nav class="hidden md:flex items-center space-x-8 font-body">

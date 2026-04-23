@@ -10,6 +10,7 @@ class Order extends Model
 {
     // Súper importante para que permita guardar los datos
     protected $fillable = [
+        'reference',
         'user_id',
         'session_id',
         'coupon_id',

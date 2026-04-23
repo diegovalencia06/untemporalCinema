@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class MovieController extends Controller
 {
@@ -107,17 +109,14 @@ class MovieController extends Controller
         $request->validate([
             'asientos' => 'required|array|min:1',
             'precio_total' => 'required|numeric',
-            'cupon_id' => 'nullable|exists:coupons,id' // Validamos que el cupón exista
+            'cupon_id' => 'nullable|exists:coupons,id'
         ]);
 
         return DB::transaction(function () use ($request, $id) {
             
-            // 1. Gestión de Cupón y Bloqueo de Stock
             $cupon = null;
             if ($request->cupon_id) {
-                // lockForUpdate previene que dos usuarios compren con el último cupón a la vez
                 $cupon = Coupon::lockForUpdate()->find($request->cupon_id);
-                
                 if (!$cupon || $cupon->stock <= 0 || !$cupon->is_active) {
                     return back()->withErrors(['cupon' => 'El cupón ya no está disponible.']);
                 }
@@ -127,8 +126,11 @@ class MovieController extends Controller
             $buyerEmail = $user ? $user->email : 'invitado@luminous.com';
             $userId = $user ? $user->id : null;
 
-            // 2. CREAMOS EL PEDIDO GLOBAL (Order)
+            // 1. GENERAR REFERENCIA DEL PEDIDO (Ej: PED-4F8A9B)
+            $orderRef = 'PED-' . strtoupper(\Illuminate\Support\Str::random(6));
+
             $order = Order::create([
+                'reference' => $orderRef,
                 'user_id' => $userId,
                 'session_id' => $id,
                 'coupon_id' => $cupon ? $cupon->id : null,
@@ -136,7 +138,6 @@ class MovieController extends Controller
                 'status' => 'completed',
             ]);
 
-            // 3. CREAMOS LAS ENTRADAS INDIVIDUALES (Tickets)
             $precioPorAsiento = $request->precio_total / count($request->asientos);
 
             foreach ($request->asientos as $asiento) {
@@ -144,27 +145,57 @@ class MovieController extends Controller
                 $columna = (int) substr($asiento, 1);
                 $fila = ord(strtoupper($letraFila)) - 64;
 
+                // 2. GENERAR REFERENCIA Y QR PARA CADA TICKET
+                $ticketRef = 'TCK-' . strtoupper(\Illuminate\Support\Str::random(8));
+                $qrContent = 'VALIDAR-' . $ticketRef . '-' . \Illuminate\Support\Str::random(10); // Lo que leerá el láser del cine
+
                 Ticket::create([
-                    'order_id' => $order->id, // Vínculo con el pedido recién creado
+                    'reference' => $ticketRef,
+                    'order_id' => $order->id,
                     'session_id' => $id,
                     'user_id' => $userId,
                     'buyer_email' => $buyerEmail,
                     'row' => $fila,
                     'column' => $columna,
                     'price' => $precioPorAsiento,
-                    'qr_code' => Str::random(12), // Un poco más largo para seguridad
+                    'qr_code' => $qrContent, 
                     'seat' => $asiento,
                     'status' => 'paid',
                 ]);
             }
 
-            // 4. ACTUALIZACIÓN DE STOCK
             if ($cupon) {
                 $cupon->decrement('stock');
             }
 
-            return redirect()->route('cartelera')->with('success', '¡Disfruta de la película! Compra realizada.');
+            // 3. GENERAR EL PDF
+            // Cargamos las relaciones para que la vista Blade tenga todos los datos
+            $order->load(['tickets', 'session.movie', 'session.room', 'user']);
+            
+            $pdf = Pdf::loadView('pdf.tickets', ['order' => $order]);
+            
+            // Guardamos el PDF en la carpeta public/storage/tickets
+            $fileName = 'Entradas_' . $orderRef . '.pdf';
+            // ... (código de generar el PDF) ...
+            Storage::disk('public')->put('tickets/' . $fileName, $pdf->output());
+
+            // CAMBIA EL RETURN FINAL POR ESTO:
+            return redirect()->route('compra.exito', ['reference' => $orderRef]);
         });
+    }
+
+    public function compraExito($reference)
+    {
+        // Buscamos el pedido en la base de datos usando la referencia (Ej: PED-A1B2C3)
+        $order = Order::with('session.movie')->where('reference', $reference)->firstOrFail();
+        
+        // Construimos la ruta del PDF
+        $pdfUrl = asset('storage/tickets/Entradas_' . $reference . '.pdf');
+
+        return Inertia::render('CompraExito', [
+            'order' => $order,
+            'pdfUrl' => $pdfUrl
+        ]);
     }
 
     public function search(Request $request)
@@ -181,6 +212,61 @@ class MovieController extends Controller
             ->get();
 
         return response()->json($movies);
+    }
+
+    public function validarQr(Request $request)
+    {
+        try {
+            $qr = $request->input('qr_code');
+            $sessionId = $request->input('session_id');
+
+            $ticket = \App\Models\Ticket::with('session.movie')->where('qr_code', $qr)->first();
+
+            // ROJO: No existe
+            if (!$ticket) {
+                return response()->json(['status' => 'invalid', 'message' => 'Código QR no reconocido.']);
+            }
+
+            $sesionTicket = \Carbon\Carbon::parse($ticket->session->start_time);
+
+            // ROJO: Es de otra sesión específica
+            if ($sessionId && $ticket->session_id != $sessionId) {
+                return response()->json(['status' => 'invalid', 'message' => 'Esta entrada es para otra sesión.', 'seat' => $ticket->seat ?? '']);
+            }
+
+            // ROJO: Escaneo general (fuera de tiempo)
+            if (!$sessionId) {
+                $ahora = now();
+                if ($ahora->isBefore($sesionTicket->copy()->subMinutes(15)) || $ahora->isAfter($sesionTicket->copy()->addMinutes(30))) {
+                    return response()->json(['status' => 'invalid', 'message' => 'La sesión no empieza en los próximos 15 min.', 'seat' => $ticket->seat ?? '']);
+                }
+            }
+
+            // AMARILLO: Ya usado
+            if ($ticket->status === 'used') {
+                return response()->json(['status' => 'used', 'message' => 'Entrada YA USADA.', 'seat' => $ticket->seat ?? '']);
+            }
+
+            // VERDE: Correcto (Aquí es donde daba el error, ahora está blindado)
+            $ticket->status = 'used'; 
+            $ticket->save(); // Usamos save() en vez de update() por si falta en el $fillable
+
+            // Evitamos error si la película fue borrada por accidente
+            $tituloPelicula = $ticket->session->movie ? $ticket->session->movie->title : 'Película';
+
+            return response()->json([
+                'status' => 'ok', 
+                'message' => '¡Válida! ' . $tituloPelicula, 
+                'seat' => $ticket->seat ?? 'N/A'
+            ]);
+
+        } catch (\Exception $e) {
+            // MAGIA: Si la base de datos o PHP explotan, el error saldrá en tu móvil en ROJO
+            return response()->json([
+                'status' => 'invalid', 
+                'message' => 'ERROR INTERNO: ' . $e->getMessage()
+            ]);
+        }
     }
 
     private function capitalizar($string) {

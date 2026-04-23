@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Http;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Hidden; // Añadido para los campos invisibles
+use App\Models\Movie; 
+use Illuminate\Validation\ValidationException;
 
 class MovieForm
 {
@@ -108,8 +110,31 @@ class MovieForm
 
 
                 Toggle::make('is_active')
-                    ->label('Activa en Cartelera')
-                    ->default(true),
+                    ->label('Activa en Web')
+                    ->default(true)
+                    // Hacemos que sea "live" para poder validar al momento
+                    ->live(onBlur: true) 
+                    ->afterStateUpdated(function (?Movie $record, $state, $set) {
+                        // Si estamos intentando desactivar la película ($state es false)
+                        // y el registro ya existe (estamos editando, no creando)
+                        if ($state === false && $record) {
+                            
+                            // Comprobamos si tiene sesiones futuras (o actuales)
+                            $hasSessions = $record->sessions()
+                                ->where('start_time', '>=', now())
+                                ->exists();
+
+                            if ($hasSessions) {
+                                // Volvemos a encender el Toggle a la fuerza
+                                $set('is_active', true);
+                                
+                                // Lanzamos un error visual para el usuario
+                                throw ValidationException::withMessages([
+                                    'data.is_active' => 'No puedes desactivar una película que tiene sesiones programadas.',
+                                ]);
+                            }
+                        }
+                    }),
             ]);
     }
 }

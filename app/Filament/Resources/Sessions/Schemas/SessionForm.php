@@ -5,12 +5,13 @@ namespace App\Filament\Resources\Sessions\Schemas;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\DatePicker; // ¡Nuevo!
-use Filament\Forms\Components\TimePicker; // ¡Nuevo!
-use Filament\Forms\Components\Hidden; // ¡Nuevo!
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TimePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Section;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Notifications\Notification;
 use Carbon\Carbon;
 use Closure;
 
@@ -21,81 +22,85 @@ class SessionForm
         return $schema
             ->components([
                 
-                // 1. Elegir Sala
                 Select::make('room_id')
                     ->relationship('room', 'name')
                     ->label('Sala')
                     ->required()
                     ->live(),
 
-                // 2. Elegir Película
                 Select::make('movie_id')
-                    ->relationship('movie', 'title')
-                    ->label('Película')
+                    ->relationship(
+                        name: 'movie', 
+                        titleAttribute: 'title', 
+                        modifyQueryUsing: fn (Builder $query) => $query->where('is_active', true)
+                    )
+                    ->label('Película (Solo activas)')
                     ->required()
                     ->live()
                     ->afterStateUpdated(function ($set, $get) {
                         self::sincronizarStartAndEnd($set, $get);
                     }),
 
-                // 3. LA FECHA (Campo Virtual)
                 DatePicker::make('session_date')
                     ->label('Fecha de la Función')
                     ->required()
-                    ->native(false) // Desactiva el calendario feo del navegador por el bonito de Filament
+                    ->native(false)
                     ->live()
                     ->formatStateUsing(fn (?Model $record) => $record?->start_time?->format('Y-m-d'))
                     ->afterStateUpdated(function ($set, $get) {
                         self::sincronizarStartAndEnd($set, $get);
                     }),
 
-                // 4. LA HORA (Campo Virtual - Múltiplos de 5)
-                // 4. LA HORA (Campo Virtual - Múltiplos de 5)
+                // --- HORA DE INICIO ---
                 TimePicker::make('session_time')
                     ->label('Hora de Inicio')
                     ->required()
                     ->native(false)
                     ->seconds(false)
                     ->minutesStep(15)
-                    ->live()
+                    ->live(onBlur: true)
                     ->formatStateUsing(fn (?Model $record) => $record?->start_time?->format('H:i'))
                     ->afterStateUpdated(function ($set, $get) {
-                        self::sincronizarStartAndEnd($set, $get);
-                    })
-                    // --- EL NUEVO CANDADO DE SEGURIDAD ---
-                    ->rule(static function () {
-                        return function (string $attribute, $value, Closure $fail) {
-                            if ($value) {
-                                // Leemos la hora escrita y sacamos solo el número de los minutos
-                                $minutos = \Carbon\Carbon::parse($value)->minute;
+                        
+                        // 1. AUTO-CORRECCIÓN A MÚLTIPLOS DE 15 MINUTOS
+                        $horaOriginal = $get('session_time');
+                        if ($horaOriginal) {
+                            $minutos = Carbon::parse($horaOriginal)->minute;
+                            if ($minutos % 15 !== 0) {
+                                $minutosFaltantes = 15 - ($minutos % 15);
+                                $nuevaHora = Carbon::parse($horaOriginal)->addMinutes($minutosFaltantes)->format('H:i');
+                                $set('session_time', $nuevaHora);
                                 
-                                // Si el resto de dividir los minutos entre 5 NO es cero...
-                                if ($minutos % 15 !== 0) {
-                                    // Lanzamos un error en rojo que bloquea el guardado
-                                    $fail('La hora debe ser un múltiplo exacto de 5 minutos (ej: 18:00, 18:05, 18:10).');
-                                }
+                                Notification::make()
+                                    ->title('Hora Ajustada')
+                                    ->body('La hora se redondeó automáticamente a un múltiplo de 15 minutos.')
+                                    ->warning()
+                                    ->send();
                             }
-                        };
+                        }
+
+                        // 2. Sincronizamos
+                        self::sincronizarStartAndEnd($set, $get);
                     }),
 
-                // --- CAMPO OCULTO (El que realmente va a la Base de Datos) ---
                 Hidden::make('start_time'),
 
-                // 5. Hora de Fin (Calculada y Protegida)
+                // --- HORA DE FIN (Con validación de solapamiento) ---
+                // --- HORA DE FIN (Con cálculo de próxima hora libre) ---
                 DateTimePicker::make('end_time')
                     ->label('Hora de Fin (Auto + 15m limpieza)')
                     ->required()
                     ->readOnly()
                     ->native(false)
-                    ->seconds(false) // También le quitamos los segundos para que quede limpio
-                    // LA MAGIA ANTI-SOLAPAMIENTO
+                    ->seconds(false)
                     ->rule(static function ($get, ?Model $record) {
                         return function (string $attribute, $value, Closure $fail) use ($get, $record) {
                             $salaId = $get('room_id');
-                            $inicio = $get('start_time'); // Lee del campo oculto
+                            $inicio = $get('start_time');
                             $fin = $value;
+                            $fecha = $get('session_date');
 
-                            if (!$salaId || !$inicio || !$fin) return;
+                            if (!$salaId || !$inicio || !$fin || !$fecha) return;
 
                             $ocupada = \App\Models\Session::where('room_id', $salaId)
                                 ->when($record, fn ($query) => $query->where('id', '!=', $record->id))
@@ -105,23 +110,41 @@ class SessionForm
                                 })
                                 ->exists();
 
+                            // SI CHOCA, BUSCAMOS EL PRÓXIMO HUECO Y AVISAMOS
                             if ($ocupada) {
-                                $fail('Error de horario: La sala seleccionada ya tiene otra función en ese bloque de tiempo.');
+                                // Buscamos la última película de ese día en esa sala
+                                $ultimaSesion = \App\Models\Session::where('room_id', $salaId)
+                                    ->whereDate('start_time', $fecha)
+                                    ->orderBy('end_time', 'desc')
+                                    ->first();
+
+                                if ($ultimaSesion) {
+                                    $end = Carbon::parse($ultimaSesion->end_time);
+                                    
+                                    // Redondeamos al múltiplo de 15 más cercano hacia arriba
+                                    $minutosResiduales = $end->minute % 15;
+                                    if ($minutosResiduales !== 0) {
+                                        $end->addMinutes(15 - $minutosResiduales);
+                                    }
+                                    
+                                    $horaSugerida = $end->format('H:i');
+                                    
+                                    $fail("⚠️ La sala está ocupada en este horario. El próximo hueco libre disponible es a las {$horaSugerida}.");
+                                } else {
+                                    $fail('⚠️ La sala ya tiene otra función en este horario. Por favor, selecciona otra hora.');
+                                }
                             }
                         };
                     }),
 
-                // 6. Precio
                 TextInput::make('base_price')
                     ->label('Precio Base')
                     ->numeric()
                     ->required()
                     ->prefix('€'),
             ]);
-        
     }
 
-    // Esta función reemplaza a calcularHoraFin y se encarga de todo
     public static function sincronizarStartAndEnd($set, $get)
     {
         $fecha = $get('session_date');
@@ -129,13 +152,9 @@ class SessionForm
         $movieId = $get('movie_id');
 
         if ($fecha && $hora) {
-            // 1. Unimos los dos inputs en un solo texto (Ej: "2023-10-25 18:00:00")
             $start = Carbon::parse("$fecha $hora");
-            
-            // 2. Guardamos ese texto en nuestro campo oculto 'start_time'
             $set('start_time', $start->toDateTimeString());
 
-            // 3. Si ya hay película, calculamos el final
             if ($movieId) {
                 $pelicula = \App\Models\Movie::find($movieId);
                 

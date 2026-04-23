@@ -33,7 +33,7 @@ return new class extends Migration
             $table->string('seat');
             
             // 7. Estado de la compra
-            $table->enum('status', ['pending', 'paid', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'paid', 'cancelled', 'used'])->default('pending');
             
             $table->timestamps();
 

@@ -49,7 +49,7 @@ const formatearHora = (t) => new Date(t).toLocaleTimeString('es-ES', { hour: '2-
   <Head :title="movie.title" />
 
   <MainLayout>
-      <div v-if="movie" class="pt-20">
+      <div v-if="movie">
         
         <section class="relative h-[60vh] md:h-[70vh] flex items-end overflow-hidden">
           <div class="absolute inset-0 z-0 bg-surface-container-highest">
@@ -71,10 +71,14 @@ const formatearHora = (t) => new Date(t).toLocaleTimeString('es-ES', { hour: '2-
               </div>
               <h1 class="text-5xl lg:text-7xl font-black font-headline tracking-tighter leading-none uppercase italic text-on-surface">{{ movie.title }}</h1>
               
-              <button class="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-3 rounded-xl font-black uppercase tracking-tighter transition-all flex items-center gap-2 active:scale-95 shadow-[0_8px_30px_rgb(220,38,38,0.3)] hover:shadow-[0_10px_40px_rgb(220,38,38,0.4)]">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
-                Ver Tráiler
-              </button>
+              <div class="flex items-center gap-4 mt-6 text-slate-300 font-medium text-lg">
+    
+                <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/10">
+                    <span class="material-symbols-outlined text-indigo-400">schedule</span>
+                    <span>{{ movie.runtime }} min</span>
+                </div>
+
+            </div>
             </div>
           </div>
         </section>
