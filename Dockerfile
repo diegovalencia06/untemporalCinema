@@ -8,8 +8,8 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure intl \
     && docker-php-ext-install gd zip pdo pdo_mysql intl bcmath
 
-# 2. Instalar Node.js 18
-RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
+# 2. Instalar Node.js 22 (Necesario para Vite 7+)
+RUN curl -sL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs
 
 RUN a2enmod rewrite
@@ -24,11 +24,11 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# 5. Instalar NPM y Build con LÍMITE DE MEMORIA
-# Aquí limitamos a Node para que no choque con el tope de Render
+# 5. Instalar NPM y Build con Node 22
 RUN npm install && NODE_OPTIONS="--max-old-space-size=400" npm run build
 
 # 6. Permisos y limpieza
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
+# Comando final
 CMD php artisan migrate --force && apache2-foreground
