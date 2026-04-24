@@ -172,31 +172,53 @@ class MovieController extends Controller
             // Cargamos las relaciones para que la vista Blade tenga todos los datos
             $order->load(['tickets', 'session.movie', 'session.room', 'user']);
             
+            // return view('pdf.tickets', ['order' => $order]); 
+
+            // DESCOMENTAMOS LA GENERACIÓN DEL PDF REAL
             $pdf = Pdf::loadView('pdf.tickets', ['order' => $order]);
             
-            // Guardamos el PDF en la carpeta public/storage/tickets
-            $fileName = 'Entradas_' . $orderRef . '.pdf';
-            // ... (código de generar el PDF) ...
-            Storage::disk('public')->put('tickets/' . $fileName, $pdf->output());
+            $fileName = 'tickets/Entradas_' . $orderRef . '.pdf';
 
-            // CAMBIA EL RETURN FINAL POR ESTO:
+            // Usamos put() y Laravel lanzará una excepción si falla (gracias al 'throw' => true)
+            Storage::disk('s3')->put($fileName, $pdf->output()); 
+
+            // Si llegamos aquí, es que se subió bien
             return redirect()->route('compra.exito', ['reference' => $orderRef]);
         });
     }
 
     public function compraExito($reference)
     {
-        // Buscamos el pedido en la base de datos usando la referencia (Ej: PED-A1B2C3)
+        // 1. Buscamos el pedido
         $order = Order::with('session.movie')->where('reference', $reference)->firstOrFail();
         
-        // Construimos la ruta del PDF
-        $pdfUrl = asset('storage/tickets/Entradas_' . $reference . '.pdf');
+        // 2. CONSTRUCCIÓN SEGURA DE LA URL
+        // En lugar de asset(), usamos Storage::url(). 
+        // Esto detecta automáticamente si estás en local o en producción (HTTPS).
+        // En tu función compraExito
+        $downloadUrl = route('tickets.download', ['reference' => $reference]);
 
-        return Inertia::render('CompraExito', [
-            'order' => $order,
-            'pdfUrl' => $pdfUrl
+    return Inertia::render('CompraExito', [
+        'order' => $order,
+        'downloadUrl' => $downloadUrl
         ]);
     }
+
+    public function descargarPdf($reference)
+{
+    $fileName = 'tickets/Entradas_' . $reference . '.pdf';
+
+    // Verificamos si existe en el disco s3
+    if (!Storage::disk('s3')->exists($fileName)) {
+        abort(404, 'Lo sentimos, el archivo de la entrada no se encuentra en la nube.');
+    }
+
+    /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+    $disk = Storage::disk('s3');
+
+    // Esto fuerza la descarga del PDF desde Cloudflare
+    return $disk->download($fileName, "Entradas_{$reference}.pdf");
+}
 
     public function search(Request $request)
     {

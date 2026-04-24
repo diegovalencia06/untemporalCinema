@@ -56,4 +56,6 @@ Route::get('/staff/escanear', function (Request $request) {
     ]);
 })->name('escanear.vue');
 
+Route::get('/descargar-entrada/{reference}', [MovieController::class, 'descargarPdf'])->name('tickets.download');
+
 require __DIR__.'/auth.php';

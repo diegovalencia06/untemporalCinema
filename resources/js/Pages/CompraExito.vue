@@ -4,7 +4,7 @@ import MainLayout from '@/Layouts/MainLayout.vue';
 
 const props = defineProps({
     order: Object,
-    pdfUrl: String
+    downloadUrl: String
 });
 </script>
 
@@ -37,9 +37,9 @@ const props = defineProps({
 
                 <div class="space-y-4">
                     <a 
-                        :href="pdfUrl" 
-                        target="_blank" 
-                        download
+                        :href="downloadUrl"
+                        target="_blank"
+                        download 
                         class="w-full flex items-center justify-center gap-2 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-red-600/20"
                     >
                         <span class="material-symbols-outlined">download</span>
