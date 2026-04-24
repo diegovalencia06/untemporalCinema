@@ -20,8 +20,7 @@
     @foreach($order->tickets as $ticket)
         <div class="ticket">
             <div class="qr-code">
-                <img src="data:image/svg+xml;base64,{{ base64_encode(QrCode::size(100)->generate($ticket->qr_code)) }}">
-            </div>
+                <img src="data:image/png;base64,{{ base64_encode(QrCode::format('png')->size(100)->generate($ticket->qr_code)) }}">            </div>
             <div class="header">
                 <h2 class="movie-title">{{ $order->session->movie->title }}</h2>
                 <p><strong>Sala:</strong> {{ $order->session->room->name }}</p>
