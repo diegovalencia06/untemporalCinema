@@ -1,33 +1,34 @@
 FROM php:8.2-apache
 
-# Instalar dependencias del sistema y extensiones de PHP para Laravel/Filament
+# 1. Instalar dependencias del sistema (¡Aquí está libicu-dev!)
 RUN apt-get update && apt-get install -y \
-    libpng-dev libjpeg-dev libfreetype6-dev libzip-dev zip unzip git curl nodejs npm \
+    libpng-dev libjpeg-dev libfreetype6-dev libzip-dev libicu-dev \
+    zip unzip git curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-configure intl \
     && docker-php-ext-install gd zip pdo pdo_mysql intl bcmath
 
-# Habilitar mod_rewrite de Apache
-RUN a2enmod rewrite
+# 2. Instalar Node.js 22 (Para que no falle Vite)
+RUN curl -sL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs
 
-# Copiar el código del proyecto
+RUN a2enmod rewrite
 COPY . /var/www/html
 
-# Configurar el directorio raíz de Apache a la carpeta /public de Laravel
+# 3. Configurar Apache
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Instalar dependencias de PHP y JS
+# 4. Instalar Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer install --no-dev --optimize-autoloader
-RUN npm install && npm run build
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Permisos para Laravel
-RUN chown -r www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# 5. Instalar NPM y Build con límite de memoria
+RUN npm install && NODE_OPTIONS="--max-old-space-size=400" npm run build
 
-EXPOSE 80
+# 6. Permisos y limpieza
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# ... (lo que ya tenías arriba)
-
-# Comando para ejecutar migraciones y luego iniciar el servidor
+# 7. Comando FINAL: Descubrir paquetes, publicar CSS de Filament, Migrar y Encender
 CMD php artisan package:discover --ansi && php artisan filament:assets && php artisan view:clear && php artisan migrate --force && apache2-foreground
