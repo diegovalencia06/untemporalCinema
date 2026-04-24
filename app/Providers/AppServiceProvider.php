@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\URL; // <-- ESTO ES VITAL
+use Illuminate\Support\Facades\URL; // <-- IMPORTANTE AÑADIR ESTA LÍNEA
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,8 +14,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Obligamos a Laravel a usar HTTPS para todo (CSS, JS, Imágenes)
-        if (str_contains(config('app.url'), 'ngrok') || request()->secure()) {
+        // Forzar HTTPS si estamos en el servidor (Render)
+        if (env('APP_ENV') !== 'local') {
             URL::forceScheme('https');
         }
     }

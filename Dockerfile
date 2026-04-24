@@ -26,3 +26,8 @@ RUN npm install && npm run build
 RUN chown -r www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 80
+
+# ... (lo que ya tenías arriba)
+
+# Comando para ejecutar migraciones y luego iniciar el servidor
+CMD php artisan package:discover --ansi && php artisan filament:assets && php artisan view:clear && php artisan migrate --force && apache2-foreground
