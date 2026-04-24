@@ -5,16 +5,20 @@ import { Html5QrcodeScanner } from 'html5-qrcode';
 import axios from 'axios';
 
 const props = defineProps({
-    sessionId: String, // Recibimos el ID de la sesión si venimos de Filament
+    sessionId: String,
     sessionInfo: Object
 });
 
-const scanResult = ref(null); // 'ok', 'used', 'invalid'
+const scanResult = ref(null);
 const scanMessage = ref('');
 const seatInfo = ref('');
 const isScanning = ref(true);
 
+// NUEVO: Variable para controlar el "tiempo de apuntado"
+const canProcessScan = ref(false); 
+
 let scanner = null;
+let timeoutId = null; // Para limpiar el timeout si el componente se destruye
 
 onMounted(() => {
     iniciarEscaner();
@@ -24,27 +28,37 @@ onUnmounted(() => {
     if (scanner) {
         scanner.clear();
     }
+    if (timeoutId) {
+        clearTimeout(timeoutId);
+    }
 });
 
 const iniciarEscaner = () => {
     isScanning.value = true;
     scanResult.value = null;
-    
-    // Configuramos el lector
+    canProcessScan.value = false; // Bloqueamos la lectura real al arrancar
+
+    // Configuramos el lector (Bajamos fps a 5 para que sea un poco menos nervioso)
     scanner = new Html5QrcodeScanner(
         "qr-reader", 
-        { fps: 10, qrbox: { width: 250, height: 250 } }, 
+        { fps: 5, qrbox: { width: 250, height: 250 } }, 
         false
     );
 
     scanner.render(onScanSuccess);
+
+    // NUEVO: Damos 1.5 segundos de "tiempo de gracia" para encuadrar el QR
+    timeoutId = setTimeout(() => {
+        canProcessScan.value = true;
+    }, 1500); // Puedes subirlo a 2000 (2 segundos) si 1.5 te sigue pareciendo rápido
 };
 
 const onScanSuccess = async (decodedText) => {
-    // Pausamos el escáner para no leer el mismo QR 20 veces
-    if (!isScanning.value) return;
+    // Si la cámara acaba de encenderse y estamos en el tiempo de gracia, IGNORAMOS la lectura
+    if (!isScanning.value || !canProcessScan.value) return;
+    
     isScanning.value = false;
-    scanner.clear(); // Ocultamos la cámara mientras mostramos el resultado
+    scanner.clear();
 
     try {
         const response = await axios.post('/api/escanear-qr', {
@@ -63,17 +77,14 @@ const onScanSuccess = async (decodedText) => {
 };
 
 const resetear = async () => {
-    // 1. Limpiamos las variables
     scanResult.value = null;
     scanMessage.value = '';
     seatInfo.value = '';
     isScanning.value = true;
     
-    // 2. Esperamos obligatoriamente a que Vue pinte el HTML de nuevo
     await nextTick();
     
-    // 3. Ahora sí, arrancamos la cámara con seguridad
-    iniciarEscaner();
+    iniciarEscaner(); // Esto volverá a disparar los 1.5 segundos de retraso
 };
 </script>
 
