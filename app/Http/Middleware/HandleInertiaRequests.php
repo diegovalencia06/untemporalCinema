@@ -38,7 +38,7 @@ class HandleInertiaRequests extends Middleware
         return array_merge(parent::share($request), [
             // Compartimos la información del usuario autenticado (si lo hay)
             'auth' => [
-                'user' => $request->user() ? $request->user()->only('id', 'name', 'email') : null,
+                'user' => $request->user() ? $request->user()->only('id', 'name', 'email', 'is_admin') : null,
             ],
         ]);
     }

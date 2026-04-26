@@ -12,14 +12,15 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DissociateAction;
 use Filament\Actions\DissociateBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+// NUEVOS IMPORTS NECESARIOS:
+use Filament\Actions\Action;
+use Illuminate\Support\Facades\Storage;
 
 class ManageSessionOrders extends ManageRelatedRecords
 {
@@ -59,14 +60,11 @@ class ManageSessionOrders extends ManageRelatedRecords
                     ->color('success')
                     ->placeholder('Sin cupón'),
 
-                // CONFIGURACIÓN DE ASIENTOS
                 TextColumn::make('tickets.seat')
                     ->label('Asientos')
                     ->badge()
                     ->color('info')
-                    // Separamos por comas para que Filament entienda la lista
                     ->separator(',') 
-                    // Esto ayuda si hay muchos asientos en un solo pedido
                     ->limitList(3)
                     ->expandableLimitedList(),
 
@@ -80,7 +78,14 @@ class ManageSessionOrders extends ManageRelatedRecords
             ])
             ->headerActions([])
             ->recordActions([
-                ViewAction::make(), // Para ver los detalles
+                
+                // --- NUEVA ACCIÓN PARA VER EL PDF ---
+                Action::make('ver_pdf')
+                    ->label('Descargar Ticket')
+                    ->icon('heroicon-o-document-text')
+                    ->url(fn ($record) => route('tickets.download', ['reference' => $record->reference]))
+                    ->openUrlInNewTab()
+                    ->visible(fn ($record) => $record->status === 'completed'),
                 DeleteAction::make(),
             ])
             ->toolbarActions([

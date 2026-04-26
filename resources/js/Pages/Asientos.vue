@@ -10,8 +10,9 @@ const props = defineProps({
     session: Object,
     occupiedSeats: {
         type: Array,
-        default: () => [] 
-    }
+        default: () => []
+    },
+    precioTicket: Number,
 });
 
 // --- LÓGICA DE ASIENTOS DINÁMICA ---
@@ -75,8 +76,10 @@ const quitarCupon = () => {
 };
 
 // --- PRECIO TOTAL CON DESCUENTO (Actualizado) ---
+// --- PRECIO TOTAL CON DESCUENTO (Corregido) ---
 const precioTotal = computed(() => {
-    const precioBase = parseFloat(props.session.base_price || 8.50); 
+    // AQUÍ ESTABA EL ERROR: Cambiamos session.base_price por props.precioTicket
+    const precioBase = parseFloat(props.precioTicket || 0); 
     const totalSinDescuento = asientosSeleccionados.value.length * precioBase;
     
     if (descuentoPorcentaje.value > 0) {
@@ -85,7 +88,6 @@ const precioTotal = computed(() => {
     }
     return totalSinDescuento.toFixed(2);
 });
-
 // Formatear Fecha y Hora
 const formatearFecha = (fecha) => {
     return new Date(fecha).toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -192,6 +194,15 @@ const confirmarReserva = () => {
                 <div class="flex justify-between items-center">
                     <span class="text-slate-500 font-label text-sm">Hora</span>
                     <span class="text-[#dce1fb] font-semibold">{{ formatearHora(session.start_time) }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-label text-sm">Precio por entrada</span>
+                    <div class="text-right">
+                        <span class="text-[#dce1fb] font-semibold">{{ parseFloat(props.precioTicket).toFixed(2) }}€</span>
+                        <span v-if="new Date(session.start_time).getDay() === 3" class="block text-green-400 text-[10px] font-bold uppercase tracking-widest mt-1">
+                            ¡Día del espectador!
+                        </span>
+                    </div>
                 </div>
                 <div class="flex justify-between items-center border-t border-white/5 pt-4">
                     <span class="text-slate-500 font-label text-sm">Asientos</span>

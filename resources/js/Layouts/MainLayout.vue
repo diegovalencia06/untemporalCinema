@@ -30,6 +30,9 @@ watch(searchQuery, async (newQuery) => {
         console.error("Error en la búsqueda:", error);
     }
 });
+
+// --- LÓGICA DEL MENÚ DE USUARIO ---
+const isDropdownOpen = ref(false); // <--- Nueva variable para el menú
 </script>
 
 <template>
@@ -69,6 +72,7 @@ watch(searchQuery, async (newQuery) => {
                 </nav>
                 
                 <div class="flex items-center space-x-4">
+                    
                     <div class="relative group">
                         <div class="flex items-center bg-white/5 border border-white/10 rounded-full px-4 py-1.5 focus-within:border-red-500/50 transition-all w-48 md:w-64">
                             <span class="material-symbols-outlined text-slate-400 text-sm mr-2">search</span>
@@ -104,12 +108,72 @@ watch(searchQuery, async (newQuery) => {
                         <span class="material-symbols-outlined text-on-surface">account_circle</span>
                     </Link>
 
-                    <Link v-else href="/perfil" class="p-2 bg-white/5 hover:bg-white/10 transition-all duration-300 rounded-full active:scale-95 flex items-center gap-2 border border-white/10">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-red-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm">
-                            {{ $page.props.auth.user.name.charAt(0) }}
-                        </div>
-                        <span class="text-sm font-bold hidden md:block text-white">{{ $page.props.auth.user.name }}</span>
-                    </Link>
+                    <div v-else class="relative">
+                        <button 
+                            @click="isDropdownOpen = !isDropdownOpen" 
+                            class="p-1 pr-4 bg-white/5 hover:bg-white/10 transition-all duration-300 rounded-full active:scale-95 flex items-center gap-3 border border-white/10 outline-none"
+                        >
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-red-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm uppercase">
+                                {{ $page.props.auth.user.name.charAt(0) }}
+                            </div>
+                            <span class="text-sm font-bold hidden md:block text-white">
+                                {{ $page.props.auth.user.name }}
+                            </span>
+                        </button>
+
+                        <div 
+                            v-if="isDropdownOpen" 
+                            @click="isDropdownOpen = false" 
+                            class="fixed inset-0 z-40"
+                        ></div>
+
+                        <transition
+                            enter-active-class="transition ease-out duration-200"
+                            enter-from-class="transform opacity-0 scale-95 translate-y-2"
+                            enter-to-class="transform opacity-100 scale-100 translate-y-0"
+                            leave-active-class="transition ease-in duration-150"
+                            leave-from-class="transform opacity-100 scale-100 translate-y-0"
+                            leave-to-class="transform opacity-0 scale-95 translate-y-2"
+                        >
+                            <div 
+                                v-if="isDropdownOpen" 
+                                class="absolute right-0 mt-3 w-56 bg-[#191f31] border border-white/10 rounded-2xl shadow-2xl py-2 z-50 overflow-hidden"
+                            >
+                                <Link 
+                                    href="/profile" 
+                                    @click="isDropdownOpen = false"
+                                    class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
+                                >
+                                    <span class="material-symbols-outlined text-[20px]">person</span>
+                                    <span class="text-sm font-medium">Mi Perfil</span>
+                                </Link>
+
+                                <a 
+                                    v-if="$page.props.auth.user.is_admin"
+                                    href="/admin" 
+                                    @click="isDropdownOpen = false"
+                                    class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
+                                >
+                                    <span class="material-symbols-outlined text-[20px]">settings</span>
+                                    <span class="text-sm font-medium">Panel Admin</span>
+                                </a>
+
+                                <div class="h-px bg-white/10 my-1"></div>
+
+                                <Link 
+                                    href="/logout" 
+                                    method="post" 
+                                    as="button"
+                                    @click="isDropdownOpen = false"
+                                    class="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors text-left"
+                                >
+                                    <span class="material-symbols-outlined text-[20px]">logout</span>
+                                    <span class="text-sm font-medium">Cerrar sesión</span>
+                                </Link>
+                            </div>
+                        </transition>
+                    </div>
+
                 </div>
             </div>
         </header>

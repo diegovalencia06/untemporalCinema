@@ -136,12 +136,6 @@ class SessionForm
                             }
                         };
                     }),
-
-                TextInput::make('base_price')
-                    ->label('Precio Base')
-                    ->numeric()
-                    ->required()
-                    ->prefix('€'),
             ]);
     }
 

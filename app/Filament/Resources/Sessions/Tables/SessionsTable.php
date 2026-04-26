@@ -46,12 +46,6 @@ class SessionsTable
                 ->label('Fin')
                 ->dateTime('H:i') // Muestra solo: 20:15
                 ->color('gray'),
-
-            // 5. El Precio
-            TextColumn::make('base_price')
-                ->label('Precio')
-                ->money('EUR') // Cambia EUR por USD, MXN, etc., según tu país
-                ->sortable(),
         ])
         ->filters([
             // Añadimos un filtro muy útil para el cine

@@ -14,11 +14,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
 
-Route::get('/sesion/{id}/asientos', [MovieController::class, 'asientos'])->name('sesion.asientos');
+    Route::get('/sesion/{id}/asientos', [MovieController::class, 'asientos'])->name('sesion.asientos');
+    Route::post('/sesion/{id}/comprar', [MovieController::class, 'comprar'])->name('sesion.comprar');
 
-Route::post('/sesion/{id}/comprar', [App\Http\Controllers\MovieController::class, 'comprar'])->name('sesion.comprar');
+
+    });
+
 
 // Ruta para ver el detalle de una película
 Route::get('/pelicula/{movie}', [MovieController::class, 'show'])->name('pelicula.show');
@@ -57,5 +59,8 @@ Route::get('/staff/escanear', function (Request $request) {
 })->name('escanear.vue');
 
 Route::get('/descargar-entrada/{reference}', [MovieController::class, 'descargarPdf'])->name('tickets.download');
+
+Route::get('/pago/exito/{reference}', [MovieController::class, 'pagoExito'])->name('stripe.success');
+Route::get('/pago/cancelado/{reference}', [MovieController::class, 'pagoCancelado'])->name('stripe.cancel');
 
 require __DIR__.'/auth.php';
