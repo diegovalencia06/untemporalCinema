@@ -16,6 +16,7 @@ class Order extends Model
         'coupon_id',
         'total_price',
         'status',
+        'rating',
     ];
 
     public function session(): BelongsTo

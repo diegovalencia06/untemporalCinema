@@ -140,7 +140,7 @@ const isDropdownOpen = ref(false); // <--- Nueva variable para el menú
                                 class="absolute right-0 mt-3 w-56 bg-[#191f31] border border-white/10 rounded-2xl shadow-2xl py-2 z-50 overflow-hidden"
                             >
                                 <Link 
-                                    href="/profile" 
+                                    href="/mi-perfil" 
                                     @click="isDropdownOpen = false"
                                     class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
                                 >

@@ -14,7 +14,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
+    Route::get('/mi-perfil', [ProfileController::class, 'index'])->name('perfil');
     Route::get('/sesion/{id}/asientos', [MovieController::class, 'asientos'])->name('sesion.asientos');
     Route::post('/sesion/{id}/comprar', [MovieController::class, 'comprar'])->name('sesion.comprar');
 
@@ -63,4 +63,5 @@ Route::get('/descargar-entrada/{reference}', [MovieController::class, 'descargar
 Route::get('/pago/exito/{reference}', [MovieController::class, 'pagoExito'])->name('stripe.success');
 Route::get('/pago/cancelado/{reference}', [MovieController::class, 'pagoCancelado'])->name('stripe.cancel');
 
+Route::post('/pedidos/{order}/valorar', [ProfileController::class, 'valorar'])->name('pedidos.valorar');
 require __DIR__.'/auth.php';
