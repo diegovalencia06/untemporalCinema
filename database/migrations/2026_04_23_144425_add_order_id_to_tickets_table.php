@@ -15,9 +15,9 @@ return new class extends Migration
             
 
             $table->foreignId('order_id')
-              ->nullable() // Permite nulos por si tienes tickets antiguos
-              ->after('id') // La coloca después de la columna ID
-              ->constrained('orders') // Crea la clave foránea
+              ->nullable() 
+              ->after('id') 
+              ->constrained('orders') 
               ->onDelete('cascade');
         });
     }

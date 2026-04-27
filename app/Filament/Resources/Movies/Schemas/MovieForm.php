@@ -21,7 +21,6 @@ class MovieForm
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->searchable()
-                    // 1. Esta función busca opciones mientras escribes
                     ->getSearchResultsUsing(function (string $search): array {
                         if (blank($search)) {
                             return [];
@@ -45,7 +44,6 @@ class MovieForm
                             })
                             ->toArray();
                     })
-                    // 2. Esta función muestra el nombre cuando el registro ya está guardado
                     ->getOptionLabelUsing(function ($value): ?string {
                         if (blank($value)) {
                             return null;
@@ -62,15 +60,12 @@ class MovieForm
 
                         return $response->json('title');
                     })
-                    // 3. ¡NUEVO! Escucha los cambios en tiempo real
                     ->live() 
-                    // 4. ¡NUEVO! Cuando el usuario selecciona una película, hacemos esto:
                     ->afterStateUpdated(function ($set, $state) {
                         if (blank($state)) {
                             return;
                         }
 
-                        // Pedimos los detalles completos de la película seleccionada a TMDb
                         $response = Http::get("https://api.themoviedb.org/3/movie/{$state}", [
                             'api_key' => env('TMDB_API_KEY'),
                             'language' => 'es-ES',
@@ -98,7 +93,6 @@ class MovieForm
                         }
                     }),
 
-                // ¡NUEVO! Campos ocultos que Filament guardará silenciosamente en la base de datos
                 Hidden::make('title'),
                 Hidden::make('synopsis'),
                 Hidden::make('poster_path'),
@@ -112,23 +106,17 @@ class MovieForm
                 Toggle::make('is_active')
                     ->label('Activa en Web')
                     ->default(true)
-                    // Hacemos que sea "live" para poder validar al momento
                     ->live(onBlur: true) 
                     ->afterStateUpdated(function (?Movie $record, $state, $set) {
-                        // Si estamos intentando desactivar la película ($state es false)
-                        // y el registro ya existe (estamos editando, no creando)
                         if ($state === false && $record) {
                             
-                            // Comprobamos si tiene sesiones futuras (o actuales)
                             $hasSessions = $record->sessions()
                                 ->where('start_time', '>=', now())
                                 ->exists();
 
                             if ($hasSessions) {
-                                // Volvemos a encender el Toggle a la fuerza
                                 $set('is_active', true);
                                 
-                                // Lanzamos un error visual para el usuario
                                 throw ValidationException::withMessages([
                                     'data.is_active' => 'No puedes desactivar una película que tiene sesiones programadas.',
                                 ]);

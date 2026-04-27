@@ -1,6 +1,5 @@
 <script setup>
 import { ref, computed } from 'vue';
-// 1. IMPORTAMOS 'Head' AQUÍ
 import { Head, Link, usePage } from '@inertiajs/vue3'; 
 import MainLayout from '@/Layouts/MainLayout.vue';
 
@@ -12,14 +11,13 @@ const props = defineProps({
 const fechaSeleccionada = ref(props.semana[0].fecha_completa);
 
 const peliculasFiltradas = computed(() => {
-    const ahora = new Date(); // Obtenemos la hora exacta actual
+    const ahora = new Date(); 
 
     return props.movies.map(movie => {
         const sesionesDelDia = movie.sessions.filter(session => {
             const inicioSesion = new Date(session.start_time);
             const fechaSesion = session.start_time.split(' ')[0].split('T')[0]; 
             
-            // CONDICIÓN: Que sea el día seleccionado Y que la hora no haya pasado
             return fechaSesion === fechaSeleccionada.value && inicioSesion > ahora;
         });
         return { ...movie, sesionesDelDia };

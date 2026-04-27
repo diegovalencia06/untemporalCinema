@@ -15,9 +15,9 @@ class CouponForm
                 TextInput::make('code')
                     ->label('Código del Cupón')
                     ->required()
-                    ->unique(ignoreRecord: true) // Que no haya dos códigos iguales
+                    ->unique(ignoreRecord: true) 
                     ->columnSpanFull()
-                    ->extraInputAttributes(['style' => 'text-transform: uppercase;']), // Para que se vea en mayúsculas
+                    ->extraInputAttributes(['style' => 'text-transform: uppercase;']), 
                     
                 TextInput::make('discount_percentage')
                     ->label('Descuento (%)')

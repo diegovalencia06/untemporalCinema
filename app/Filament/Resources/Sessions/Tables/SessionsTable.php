@@ -25,30 +25,26 @@ class SessionsTable
                 ->label('Película')
                 ->searchable()
                 ->sortable()
-                ->weight('bold') // Negrita para que destaque
-                ->icon('heroicon-o-film'), // Un icono de película al lado
+                ->weight('bold') 
+                ->icon('heroicon-o-film'), 
 
-            // 2. La Sala (Como etiqueta visual)
             TextColumn::make('room.name')
                 ->label('Sala')
                 ->sortable()
-                ->badge() // Esto lo convierte en una "etiqueta" o pastilla de color
-                ->color('info'), // Color azulito por defecto
+                ->badge() 
+                ->color('info'), 
 
-            // 3. Hora de Inicio (Formateada bonita)
             TextColumn::make('start_time')
                 ->label('Inicio')
-                ->dateTime('d/m/Y H:i') // Muestra: 25/10/2023 18:00
+                ->dateTime('d/m/Y H:i') 
                 ->sortable(),
 
-            // 4. Hora de Fin (Solo la hora para no repetir la fecha)
             TextColumn::make('end_time')
                 ->label('Fin')
                 ->dateTime('H:i') // Muestra solo: 20:15
                 ->color('gray'),
         ])
         ->filters([
-            // Añadimos un filtro muy útil para el cine
             SelectFilter::make('room_id')
                 ->relationship('room', 'name')
                 ->label('Filtrar por Sala'),
@@ -62,13 +58,11 @@ class SessionsTable
                     ->modalHeading('¿Clonar a mañana?')
                     ->modalDescription('Se creará la misma sesión en la misma sala pero 24 horas después.')
                     ->action(function (Session $record) {
-                        // 1. Calculamos los nuevos tiempos (+1 día)
                         $nuevoInicio = Carbon::parse($record->start_time)->addDay();
                         $nuevoFin = Carbon::parse($record->end_time)->addDay();
                         $salaId = $record->room_id;
 
-                        // 2. VALIDACIÓN: Comprobamos si la sala está ocupada en ese nuevo hueco
-                        // Usamos la misma lógica que tienes en tu Form
+
                         $ocupada = Session::where('room_id', $salaId)
                             ->where(function ($query) use ($nuevoInicio, $nuevoFin) {
                                 $query->where('start_time', '<', $nuevoFin)
@@ -85,7 +79,6 @@ class SessionsTable
                             return;
                         }
 
-                        // 3. CLONACIÓN: Si está libre, creamos la copia
                         $nuevaSesion = $record->replicate();
                         $nuevaSesion->start_time = $nuevoInicio;
                         $nuevaSesion->end_time = $nuevoFin;
@@ -100,9 +93,8 @@ class SessionsTable
                 Action::make('ver_tickets')
                     ->label('Entradas')
                     ->icon('heroicon-o-ticket')
-                    ->color('success') // Lo ponemos verde para que llame la atención
+                    ->color('success') 
                     
-                    // El toque Pro: Mostrar cuántas entradas pagadas hay
                     ->badge(fn ($record) => $record->tickets()->where('status', 'paid')->count())
                     ->url(fn ($record) => route('filament.admin.resources.sessions.tickets', ['record' => $record])),
                     // Al hacer clic, le llevamos a la página de edición de esa sesión específica
@@ -121,7 +113,6 @@ class SessionsTable
                         $inicio = Carbon::parse($record->start_time);
                         $ahora = now();
 
-                        // El botón solo es visible si "ahora" está entre 15 min antes y 30 min después
                         return $ahora->isAfter($inicio->copy()->subMinutes(15)) 
                             && $ahora->isBefore($inicio->copy()->addMinutes(30));
                     }),        

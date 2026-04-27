@@ -14,7 +14,6 @@ class Ticket extends Model
         'reference', 'order_id', 'session_id', 'user_id', 'buyer_email', 'row', 'column', 'price', 'qr_code', 'status', 'seat',
     ];
 
-    // Magia de Laravel: Generar un código único automáticamente antes de crear el ticket
     protected static function booted()
     {
         static::creating(function ($ticket) {

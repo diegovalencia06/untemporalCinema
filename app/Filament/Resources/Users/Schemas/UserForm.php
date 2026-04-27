@@ -27,9 +27,7 @@ class UserForm
                     TextInput::make('password')
                         ->label('Contraseña')
                         ->password()
-                        // Solo guarda la contraseña si escribes algo (para no sobreescribir con vacío al editar)
                         ->dehydrated(fn ($state) => filled($state))
-                        // Obligatoria solo cuando estamos creando un usuario nuevo
                         ->required(fn (string $context): bool => $context === 'create')
                         ->maxLength(255),
             ]);

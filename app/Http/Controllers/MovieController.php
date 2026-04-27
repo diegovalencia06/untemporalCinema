@@ -106,12 +106,8 @@ class MovieController extends Controller
         return response()->json(['valid' => false, 'message' => 'Cupón no disponible o agotado.'], 404);
     }
 
-    /**
-     * Procesa la compra creando un Pedido (Order) y sus Entradas (Tickets)
-     */
     public function comprar(Request $request, $id)
     {
-        // 1. Validamos solo lo necesario (el precio ya no viene de Vue)
         $request->validate([
             'asientos' => 'required|array|min:1',
             'cupon_id' => 'nullable|exists:coupons,id'
@@ -119,12 +115,10 @@ class MovieController extends Controller
 
         return DB::transaction(function () use ($request, $id) {
             
-            // 2. Calculamos los precios seguros en el backend
             $session = Session::with('movie')->findOrFail($id);
             $precioUnitario = $this->calcularPrecioTicket($session);
             $precioTotal = $precioUnitario * count($request->asientos);
 
-            // 3. Aplicamos descuento si hay cupón válido
             $cupon = null;
             if ($request->cupon_id) {
                 $cupon = Coupon::lockForUpdate()->find($request->cupon_id);
@@ -142,7 +136,6 @@ class MovieController extends Controller
 
             $orderRef = 'PED-' . strtoupper(\Illuminate\Support\Str::random(6));
 
-            // Guardamos con el precioTotal seguro
             $order = Order::create([
                 'reference' => $orderRef,
                 'user_id' => $userId,
@@ -170,7 +163,7 @@ class MovieController extends Controller
                     'buyer_email' => $buyerEmail,
                     'row' => $fila,
                     'column' => $columna,
-                    'price' => $precioUnitario, // Guardamos con el precioUnitario seguro
+                    'price' => $precioUnitario, 
                     'qr_code' => $qrContent, 
                     'seat' => $asiento,
                     'status' => 'pending', 
@@ -181,10 +174,8 @@ class MovieController extends Controller
                 $cupon->decrement('stock');
             }
 
-            // 4. CONECTAMOS CON STRIPE
             Stripe::setApiKey(env('STRIPE_SECRET'));
 
-            // Stripe requiere el precio en céntimos (ej: 15.50€ -> 1550) calculados del backend
             $precioEnCentimos = (int) round($precioTotal * 100);
 
             $checkout_session = StripeSession::create([
@@ -203,55 +194,41 @@ class MovieController extends Controller
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
-                // Rutas a las que volverá Stripe después de cobrar
                 'success_url' => route('stripe.success', ['reference' => $orderRef]),
                 'cancel_url' => route('stripe.cancel', ['reference' => $orderRef]),
             ]);
 
-            // 5. REDIRIGIR A STRIPE
             return Inertia::location($checkout_session->url);
         });
     }
 
-    /**
-     * PASO 2: El cliente vuelve de Stripe tras pagar con éxito
-     */
     public function pagoExito($reference)
     {
         $order = Order::with(['tickets', 'session.movie', 'session.room', 'user'])->where('reference', $reference)->firstOrFail();
 
-        // Evitamos regenerar si el usuario recarga la página
         if ($order->status !== 'completed') {
             
             DB::transaction(function () use ($order) {
-                // Pasamos todo a pagado
                 $order->update(['status' => 'completed']);
                 $order->tickets()->update(['status' => 'paid']);
 
-                // AHORA SÍ GENERAMOS EL PDF
                 $pdf = Pdf::loadView('pdf.tickets', ['order' => $order]);
                 $fileName = 'tickets/Entradas_' . $order->reference . '.pdf';
                 Storage::disk('s3')->put($fileName, $pdf->output()); 
             });
         }
 
-        // Redirigimos a la pantalla de éxito de Vue que ya tenías
         return redirect()->route('compra.exito', ['reference' => $order->reference]);
     }
 
-    /**
-     * PASO 3: Si el cliente cancela el pago en Stripe y vuelve atrás
-     */
     public function pagoCancelado($reference)
     {
         $order = Order::where('reference', $reference)->firstOrFail();
         
         if ($order->status === 'pending') {
-            // Devolvemos el stock del cupón si usó uno
             if ($order->coupon_id) {
                 Coupon::find($order->coupon_id)->increment('stock');
             }
-            // Borramos los tickets y el pedido porque no pagó
             $order->tickets()->delete();
             $order->delete();
         }
@@ -261,13 +238,10 @@ class MovieController extends Controller
 
     public function compraExito($reference)
     {
-        // 1. Find the order with related models
         $order = Order::with(['session.movie', 'tickets'])->where('reference', $reference)->firstOrFail();
         
-        // 2. Generate the download URL for the PDF
         $downloadUrl = route('tickets.download', ['reference' => $reference]);
 
-        // 3. Render the Vue page
         return Inertia::render('CompraExito', [
             'order' => $order,
             'downloadUrl' => $downloadUrl
@@ -278,7 +252,6 @@ class MovieController extends Controller
     {
         $fileName = 'tickets/Entradas_' . $reference . '.pdf';
 
-        // Verificamos si existe en el disco s3
         if (!Storage::disk('s3')->exists($fileName)) {
             abort(404, 'Lo sentimos, el archivo de la entrada no se encuentra en la nube.');
         }
@@ -286,7 +259,6 @@ class MovieController extends Controller
         /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
         $disk = Storage::disk('s3');
 
-        // Esto fuerza la descarga del PDF desde Cloudflare
         return $disk->download($fileName, "Entradas_{$reference}.pdf");
     }
 
@@ -314,19 +286,16 @@ class MovieController extends Controller
 
             $ticket = \App\Models\Ticket::with('session.movie')->where('qr_code', $qr)->first();
 
-            // ROJO: No existe
             if (!$ticket) {
                 return response()->json(['status' => 'invalid', 'message' => 'Código QR no reconocido.']);
             }
 
             $sesionTicket = \Carbon\Carbon::parse($ticket->session->start_time);
 
-            // ROJO: Es de otra sesión específica
             if ($sessionId && $ticket->session_id != $sessionId) {
                 return response()->json(['status' => 'invalid', 'message' => 'Esta entrada es para otra sesión.', 'seat' => $ticket->seat ?? '']);
             }
 
-            // ROJO: Escaneo general (fuera de tiempo)
             if (!$sessionId) {
                 $ahora = now();
                 if ($ahora->isBefore($sesionTicket->copy()->subMinutes(15)) || $ahora->isAfter($sesionTicket->copy()->addMinutes(30))) {
@@ -334,16 +303,13 @@ class MovieController extends Controller
                 }
             }
 
-            // AMARILLO: Ya usado
             if ($ticket->status === 'used') {
                 return response()->json(['status' => 'used', 'message' => 'Entrada YA USADA.', 'seat' => $ticket->seat ?? '']);
             }
 
-            // VERDE: Correcto (Aquí es donde daba el error, ahora está blindado)
             $ticket->status = 'used'; 
-            $ticket->save(); // Usamos save() en vez de update() por si falta en el $fillable
+            $ticket->save(); 
 
-            // Evitamos error si la película fue borrada por accidente
             $tituloPelicula = $ticket->session->movie ? $ticket->session->movie->title : 'Película';
 
             return response()->json([
@@ -353,7 +319,6 @@ class MovieController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            // MAGIA: Si la base de datos o PHP explotan, el error saldrá en tu móvil en ROJO
             return response()->json([
                 'status' => 'invalid', 
                 'message' => 'ERROR INTERNO: ' . $e->getMessage()
@@ -361,9 +326,6 @@ class MovieController extends Controller
         }
     }
 
-    /**
-     * Calcula el precio de 1 entrada según duración y día de la semana.
-     */
     private function calcularPrecioTicket($session)
     {
         $duracion = $session->movie->runtime ?? 0;

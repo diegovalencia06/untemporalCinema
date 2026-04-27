@@ -14,11 +14,10 @@ const scanMessage = ref('');
 const seatInfo = ref('');
 const isScanning = ref(true);
 
-// NUEVO: Variable para controlar el "tiempo de apuntado"
 const canProcessScan = ref(false); 
 
 let scanner = null;
-let timeoutId = null; // Para limpiar el timeout si el componente se destruye
+let timeoutId = null;
 
 onMounted(() => {
     iniciarEscaner();
@@ -36,9 +35,8 @@ onUnmounted(() => {
 const iniciarEscaner = () => {
     isScanning.value = true;
     scanResult.value = null;
-    canProcessScan.value = false; // Bloqueamos la lectura real al arrancar
+    canProcessScan.value = false; 
 
-    // Configuramos el lector (Bajamos fps a 5 para que sea un poco menos nervioso)
     scanner = new Html5QrcodeScanner(
         "qr-reader", 
         { fps: 5, qrbox: { width: 250, height: 250 } }, 
@@ -47,14 +45,12 @@ const iniciarEscaner = () => {
 
     scanner.render(onScanSuccess);
 
-    // NUEVO: Damos 1.5 segundos de "tiempo de gracia" para encuadrar el QR
     timeoutId = setTimeout(() => {
         canProcessScan.value = true;
-    }, 1500); // Puedes subirlo a 2000 (2 segundos) si 1.5 te sigue pareciendo rápido
+    }, 1500); 
 };
 
 const onScanSuccess = async (decodedText) => {
-    // Si la cámara acaba de encenderse y estamos en el tiempo de gracia, IGNORAMOS la lectura
     if (!isScanning.value || !canProcessScan.value) return;
     
     isScanning.value = false;

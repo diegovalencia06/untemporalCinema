@@ -17,7 +17,6 @@ class TicketForm
             ->components([
                 Tabs::make('Tabs')
                 ->tabs([
-                    // PESTAÑA 1: SESIÓN
                     Tab::make('Sesión')
                         ->icon('heroicon-m-film')
                         ->schema([
@@ -29,7 +28,6 @@ class TicketForm
                                 ->required(),
                         ]),
 
-                    // PESTAÑA 2: COMPRADOR
                     Tabs\Tab::make('Comprador')
                         ->icon('heroicon-m-user')
                         ->schema([
@@ -46,7 +44,6 @@ class TicketForm
                                 ->helperText('Solo si el cliente tiene cuenta en el cine.'),
                         ])->columns(2),
 
-                    // PESTAÑA 3: ASIENTO Y PAGO
                     Tabs\Tab::make('Asiento y Pago')
                         ->icon('heroicon-m-ticket')
                         ->schema([
@@ -75,7 +72,7 @@ class TicketForm
                                 ->default('pending'),
                         ])->columns(2),
                 ])
-                ->columnSpanFull(), // Hace que las pestañas ocupen todo el ancho disponible
+                ->columnSpanFull(), 
             ]);
     }
 }

@@ -20,13 +20,13 @@ class CouponsTable
                 ->searchable()
                 ->sortable()
                 ->weight('bold')
-                ->color('primary'), // Lo pone del color principal de tu panel
+                ->color('primary'), 
                 
                 TextColumn::make('discount_percentage')
                     ->label('Descuento')
                     ->sortable()
                     ->suffix('%')
-                    ->badge(), // Le pone un diseño tipo "píldora"
+                    ->badge(), 
                     
                 TextColumn::make('stock')
                     ->label('Stock')

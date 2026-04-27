@@ -3,7 +3,6 @@ import { ref, watch } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 
-// --- LÓGICA DEL BUSCADOR ---
 const searchQuery = ref('');
 const results = ref([]);
 const isFocused = ref(false);
@@ -31,8 +30,7 @@ watch(searchQuery, async (newQuery) => {
     }
 });
 
-// --- LÓGICA DEL MENÚ DE USUARIO ---
-const isDropdownOpen = ref(false); // <--- Nueva variable para el menú
+const isDropdownOpen = ref(false); 
 </script>
 
 <template>

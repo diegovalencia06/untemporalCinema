@@ -8,11 +8,9 @@ const props = defineProps({
     historial: Array,
 });
 
-// --- ESTADO ---
-const filtroActivo = ref('vistas'); // 'vistas' o 'futuras'
-const criterioOrden = ref('fecha'); // 'fecha', 'rating_propio', 'rating_medio'
+const filtroActivo = ref('vistas'); 
+const criterioOrden = ref('fecha');
 
-// --- LÓGICA DE FILTRADO Y ORDENACIÓN ---
 const peliculasFuturas = computed(() => props.historial.filter(p => p.es_futuro));
 
 const peliculasVistas = computed(() => {

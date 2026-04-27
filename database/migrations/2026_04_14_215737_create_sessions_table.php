@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('room_id')->constrained()->cascadeOnDelete();
             $table->dateTime('start_time');
             $table->dateTime('end_time');
-            $table->decimal('base_price', 8, 2); // Precio con 2 decimales
+            $table->decimal('base_price', 8, 2);
             $table->timestamps();
         });
     }

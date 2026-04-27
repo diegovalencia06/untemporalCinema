@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import axios from 'axios'; // <--- FALTABA ESTO para hacer la petición a Laravel
+import axios from 'axios'; 
 import MainLayout from '@/Layouts/MainLayout.vue';
 
 // Props que recibiremos de Laravel
@@ -15,7 +15,6 @@ const props = defineProps({
     precioTicket: Number,
 });
 
-// --- LÓGICA DE ASIENTOS DINÁMICA ---
 const asientosSeleccionados = ref([]);
 
 const columnas = computed(() => parseInt(props.session.room?.columns) || 12);
@@ -39,12 +38,11 @@ const toggleAsiento = (id) => {
     }
 };
 
-// --- LÓGICA DE CUPONES (Esto te faltaba) ---
 const cuponCode = ref('');
 const descuentoPorcentaje = ref(0);
 const cuponMensaje = ref('');
 const cuponError = ref(false);
-const cuponId = ref(null); // Para mandarlo a la BBDD al comprar
+const cuponId = ref(null); 
 
 const aplicarCupon = async () => {
     if (!cuponCode.value) return;
@@ -75,8 +73,6 @@ const quitarCupon = () => {
     cuponMensaje.value = '';
 };
 
-// --- PRECIO TOTAL CON DESCUENTO (Actualizado) ---
-// --- PRECIO TOTAL CON DESCUENTO (Corregido) ---
 const precioTotal = computed(() => {
     // AQUÍ ESTABA EL ERROR: Cambiamos session.base_price por props.precioTicket
     const precioBase = parseFloat(props.precioTicket || 0); 
@@ -106,7 +102,7 @@ const confirmarReserva = () => {
     router.post(`/sesion/${props.session.id}/comprar`, {
         asientos: asientosSeleccionados.value,
         precio_total: precioTotal.value,
-        cupon_id: cuponId.value // <--- Enviamos el ID del cupón usado
+        cupon_id: cuponId.value
     });
 };
 </script>

@@ -18,10 +18,9 @@ class TicketsTable
                     ->label('Código')
                     ->searchable()
                     ->weight('bold')
-                    ->copyable() // Permite copiar el código con un clic
+                    ->copyable() 
                     ->copyMessage('Código copiado'),
 
-                // Mostramos el título de la película navegando por las relaciones
                 TextColumn::make('session.movie.title')
                     ->label('Película')
                     ->sortable()
@@ -31,7 +30,6 @@ class TicketsTable
                     ->label('Comprador')
                     ->searchable(),
 
-                // Unimos la Fila y el Asiento en una sola columna visual
                 TextColumn::make('ubicacion')
                     ->label('Asiento')
                     ->getStateUsing(fn ($record) => "Fila {$record->row}, As. {$record->column}"),
@@ -61,7 +59,7 @@ class TicketsTable
                     ->label('Fecha de Compra')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true), // Oculto por defecto para no saturar
+                    ->toggleable(isToggledHiddenByDefault: true), 
             ])
             ->filters([
                 //

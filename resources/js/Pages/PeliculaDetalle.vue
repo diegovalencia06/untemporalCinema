@@ -1,14 +1,11 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';
-// IMPORTAMOS EL LAYOUT
-import MainLayout from '@/Layouts/MainLayout.vue'; 
+import { Head, Link } from '@inertiajs/vue3';import MainLayout from '@/Layouts/MainLayout.vue'; 
 
 const props = defineProps({
   movie: { type: Object, required: true }
 });
 
-// --- LÓGICA DE FECHAS Y SESIONES (Solo lo que pertenece a esta página) ---
 const capitalizar = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
 const proximos7Dias = computed(() => {

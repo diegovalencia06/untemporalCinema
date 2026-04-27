@@ -25,25 +25,21 @@ class MoviesTable
                 ->height('150px')
                 ->getStateUsing(function ($record) {
                     if (!$record->poster_path) return null;
-                    // Retornamos la URL completa de la imagen para que Filament la dibuje
                     return "https://image.tmdb.org/t/p/w200" . $record->poster_path;
                 }),
 
-            // 2. El Título (Lo hacemos buscable y ordenable)
                 TextColumn::make('title')
                     ->label('Título')
                     ->searchable()
                     ->sortable()
-                    ->weight('bold'), // Lo ponemos en negrita para que destaque
+                    ->weight('bold'), 
 
-                // 3. La Duración (Le añadimos la palabra "min" al final)
                 TextColumn::make('runtime')
                     ->label('Duración')
                     ->formatStateUsing(fn ($state) => $state ? "{$state} min" : 'N/A')
                     ->icon('heroicon-o-clock') // Le ponemos un icono de relojito al lado
                     ->sortable(),
 
-                // 4. Si está en cartelera (Muestra un check verde o una X roja)
                 IconColumn::make('is_active')
                     ->label('En Web')
                     ->boolean(),

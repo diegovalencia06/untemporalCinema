@@ -62,7 +62,6 @@ class SessionForm
                     ->formatStateUsing(fn (?Model $record) => $record?->start_time?->format('H:i'))
                     ->afterStateUpdated(function ($set, $get) {
                         
-                        // 1. AUTO-CORRECCIÓN A MÚLTIPLOS DE 15 MINUTOS
                         $horaOriginal = $get('session_time');
                         if ($horaOriginal) {
                             $minutos = Carbon::parse($horaOriginal)->minute;
@@ -79,14 +78,11 @@ class SessionForm
                             }
                         }
 
-                        // 2. Sincronizamos
                         self::sincronizarStartAndEnd($set, $get);
                     }),
 
                 Hidden::make('start_time'),
 
-                // --- HORA DE FIN (Con validación de solapamiento) ---
-                // --- HORA DE FIN (Con cálculo de próxima hora libre) ---
                 DateTimePicker::make('end_time')
                     ->label('Hora de Fin (Auto + 15m limpieza)')
                     ->required()
@@ -110,9 +106,7 @@ class SessionForm
                                 })
                                 ->exists();
 
-                            // SI CHOCA, BUSCAMOS EL PRÓXIMO HUECO Y AVISAMOS
                             if ($ocupada) {
-                                // Buscamos la última película de ese día en esa sala
                                 $ultimaSesion = \App\Models\Session::where('room_id', $salaId)
                                     ->whereDate('start_time', $fecha)
                                     ->orderBy('end_time', 'desc')
@@ -121,7 +115,6 @@ class SessionForm
                                 if ($ultimaSesion) {
                                     $end = Carbon::parse($ultimaSesion->end_time);
                                     
-                                    // Redondeamos al múltiplo de 15 más cercano hacia arriba
                                     $minutosResiduales = $end->minute % 15;
                                     if ($minutosResiduales !== 0) {
                                         $end->addMinutes(15 - $minutosResiduales);
