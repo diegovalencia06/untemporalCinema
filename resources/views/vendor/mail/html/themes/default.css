@@ -1,0 +1,152 @@
+/* Base de la página (Fondo principal) */
+body, body *:not(html):not(style):not(br):not(tr):not(code) {
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    position: relative;
+}
+
+body {
+    background-color: #0c1324; /* Fondo azul oscuro de tu app */
+    color: #ffffff;
+    height: 100%;
+    hyphens: auto;
+    line-height: 1.4;
+    margin: 0;
+    -moz-osx-font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: none;
+    width: 100% !important;
+}
+
+.wrapper {
+    background-color: #0c1324;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+}
+
+/* Cabecera (Header) */
+.header {
+    padding: 25px 0;
+    text-align: center;
+}
+
+.header a {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 900; /* font-black */
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em; /* tracking-widest */
+}
+
+/* Tarjeta Principal (Donde va el texto) */
+.inner-body {
+    background-color: #191f31; /* Fondo de la tarjeta (surface-container-low) */
+    border: 1px solid #2a3241; /* Borde sutil (white/5) */
+    border-radius: 16px; /* rounded-2xl */
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); /* shadow-2xl */
+    margin: 0 auto;
+    padding: 32px;
+    width: 570px;
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 570px;
+}
+
+/* Tipografía dentro de la tarjeta */
+h1 {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 800; /* font-extrabold */
+    margin-top: 0;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+p {
+    color: #cbd5e1; /* text-slate-300 / text-on-surface-variant */
+    font-size: 15px;
+    line-height: 1.6em;
+    margin-top: 0;
+    text-align: left;
+}
+
+/* El Botón Rojo (Primary) */
+.action {
+    margin: 30px auto;
+    padding: 0;
+    text-align: center;
+    width: 100%;
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 100%;
+}
+
+.button {
+    -webkit-text-size-adjust: none;
+    border-radius: 12px; /* rounded-xl */
+    color: #fff;
+    display: inline-block;
+    overflow: hidden;
+    text-decoration: none;
+}
+
+.button-primary {
+    background-color: #dc2626; /* bg-red-600 */
+    border-bottom: 8px solid #dc2626;
+    border-left: 24px solid #dc2626;
+    border-right: 24px solid #dc2626;
+    border-top: 8px solid #dc2626;
+    font-weight: 900; /* font-black */
+    text-transform: uppercase;
+    letter-spacing: 0.1em; /* tracking-widest */
+    font-size: 12px;
+}
+
+/* Panel inferior de enlaces alternativos */
+.panel {
+    border-left: #dc2626 solid 4px;
+    margin: 21px 0;
+}
+
+.panel-content {
+    background-color: #0c1324;
+    color: #cbd5e1;
+    padding: 16px;
+}
+
+/* Pie de página (Footer) */
+.footer {
+    margin: 0 auto;
+    padding: 0;
+    text-align: center;
+    width: 570px;
+    -premailer-cellpadding: 0;
+    -premailer-cellspacing: 0;
+    -premailer-width: 570px;
+}
+
+.footer p {
+    color: #64748b; /* text-slate-500 */
+    font-size: 12px;
+    text-align: center;
+}
+
+/* Adaptación a móviles */
+@media only screen and (max-width: 600px) {
+    .inner-body {
+        width: 100% !important;
+        border-radius: 0 !important;
+        border: none !important;
+    }
+
+    .footer {
+        width: 100% !important;
+    }
+}

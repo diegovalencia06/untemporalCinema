@@ -50,6 +50,19 @@ class SessionsTable
                 ->label('Filtrar por Sala'),
             ])
             ->recordActions([
+                Action::make('escanear')
+                    ->label('Escanear Accesos')
+                    ->icon('heroicon-m-qr-code')
+                    ->color('info')
+                    ->url(fn ($record) => route('escanear.vue', ['session_id' => $record->id]))
+                    ->openUrlInNewTab()
+                    ->visible(function ($record) {
+                        $inicio = Carbon::parse($record->start_time);
+                        $ahora = now();
+
+                        return $ahora->isAfter($inicio->copy()->subMinutes(15)) 
+                            && $ahora->isBefore($inicio->copy()->addMinutes(30));
+                    }),        
                 Action::make('clonarSiguienteDia')
                     ->label('Clonar Mañana')
                     ->icon('heroicon-o-document-duplicate')
@@ -103,19 +116,6 @@ class SessionsTable
                     ->icon('heroicon-o-ticket')
                     ->color('success')
                     ->url(fn ($record) => route('filament.admin.resources.sessions.orders', ['record' => $record])),
-                Action::make('escanear')
-                    ->label('Escanear Accesos')
-                    ->icon('heroicon-m-qr-code')
-                    ->color('info')
-                    ->url(fn ($record) => route('escanear.vue', ['session_id' => $record->id]))
-                    ->openUrlInNewTab()
-                    ->visible(function ($record) {
-                        $inicio = Carbon::parse($record->start_time);
-                        $ahora = now();
-
-                        return $ahora->isAfter($inicio->copy()->subMinutes(15)) 
-                            && $ahora->isBefore($inicio->copy()->addMinutes(30));
-                    }),        
                 DeleteAction::make(),
                 EditAction::make()
             ])

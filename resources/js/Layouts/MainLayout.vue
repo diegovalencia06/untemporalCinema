@@ -43,32 +43,6 @@ const isDropdownOpen = ref(false);
                     Untemporal Cinema
                 </Link>
                 
-                <nav class="hidden md:flex items-center space-x-8 font-body">
-                    <Link 
-                        href="/" 
-                        :class="[
-                            'transition-colors font-bold',
-                            $page.url === '/' 
-                                ? 'text-red-500 underline decoration-2 underline-offset-8' 
-                                : 'text-on-surface-variant hover:text-on-surface'
-                        ]"
-                    >
-                        Cartelera
-                    </Link>
-                    
-                    <Link 
-                        href="/ofertas" 
-                        :class="[
-                            'transition-colors font-bold',
-                            $page.url.startsWith('/ofertas') 
-                                ? 'text-red-500 underline decoration-2 underline-offset-8' 
-                                : 'text-on-surface-variant hover:text-on-surface'
-                        ]"
-                    >
-                        Ofertas
-                    </Link>
-                </nav>
-                
                 <div class="flex items-center space-x-4">
                     
                     <div class="relative group">

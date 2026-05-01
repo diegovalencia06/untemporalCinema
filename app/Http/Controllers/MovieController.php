@@ -17,6 +17,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ConfirmacionCompraMail;
 
 class MovieController extends Controller
 {
@@ -212,9 +214,13 @@ class MovieController extends Controller
                 $order->update(['status' => 'completed']);
                 $order->tickets()->update(['status' => 'paid']);
 
-                $pdf = Pdf::loadView('pdf.tickets', ['order' => $order]);
+                $pdf = Pdf::loadView('pdf.tickets', ['order' => $order])
+                    ->setPaper('a4', 'portrait') // Tamaño folio normal vertical
+                    ->setWarnings(false);;
+                $pdfContent = $pdf->output(); 
                 $fileName = 'tickets/Entradas_' . $order->reference . '.pdf';
                 Storage::disk('s3')->put($fileName, $pdf->output()); 
+            
             });
         }
 
