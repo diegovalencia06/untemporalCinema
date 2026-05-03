@@ -46,7 +46,7 @@ const passwordForm = useForm({
 });
 
 const updatePassword = () => {
-    passwordForm.put(route('password.update'), {
+    passwordForm.put('/password', {
         preserveScroll: true,
         onSuccess: () => passwordForm.reset(),
     });

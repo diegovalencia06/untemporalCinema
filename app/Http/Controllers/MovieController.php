@@ -221,6 +221,7 @@ class MovieController extends Controller
                 $fileName = 'tickets/Entradas_' . $order->reference . '.pdf';
                 Storage::disk('s3')->put($fileName, $pdf->output()); 
             
+                Mail::to($order->user)->send(new ConfirmacionCompraMail($order, $pdfContent));
             });
         }
 

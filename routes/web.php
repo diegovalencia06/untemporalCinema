@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Session;
 use Carbon\Carbon;
+use App\Http\Controllers\Auth\PasswordController;
+
 
 Route::get('/', [MovieController::class, 'index'])->name('cartelera');
 
@@ -59,4 +61,7 @@ Route::get('/pago/exito/{reference}', [MovieController::class, 'pagoExito'])->na
 Route::get('/pago/cancelado/{reference}', [MovieController::class, 'pagoCancelado'])->name('stripe.cancel');
 
 Route::post('/pedidos/{order}/valorar', [ProfileController::class, 'valorar'])->name('pedidos.valorar');
+
+
+Route::put('/password', [PasswordController::class, 'update'])->name('password.update');
 require __DIR__.'/auth.php';
