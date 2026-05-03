@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';import MainLayout from '@/Layouts/MainLayout.vue'; 
+import { Head, Link } from '@inertiajs/vue3';
+import MainLayout from '@/Layouts/MainLayout.vue'; 
 
 const props = defineProps({
   movie: { type: Object, required: true }
@@ -48,99 +49,97 @@ const formatearHora = (t) => new Date(t).toLocaleTimeString('es-ES', { hour: '2-
   <MainLayout>
       <div v-if="movie">
         
-        <section class="relative h-[60vh] md:h-[70vh] flex items-end overflow-hidden">
+        <section class="relative h-[50vh] md:h-[70vh] flex items-end overflow-hidden">
           <div class="absolute inset-0 z-0 bg-surface-container-highest">
             <img v-if="movie.backdrop_path || movie.poster_path" :src="`https://image.tmdb.org/t/p/original${movie.backdrop_path ?? movie.poster_path}`" class="w-full h-full object-cover brightness-[0.3] blur-[1px]" />
             <div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/40 to-transparent"></div>
           </div>
 
-          <div class="relative z-10 max-w-screen-2xl mx-auto w-full px-6 lg:px-12 pb-12 flex flex-col md:flex-row gap-10 items-center md:items-end">
-            <div class="hidden md:block w-64 shrink-0 rounded-2xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-white/10 bg-surface-container">
+          <div class="relative z-10 max-w-screen-2xl mx-auto w-full px-4 md:px-6 lg:px-12 pb-8 md:pb-12 flex flex-col md:flex-row gap-6 md:gap-10 items-start md:items-end">
+            <div class="hidden md:block w-48 lg:w-64 shrink-0 rounded-2xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-white/10 bg-surface-container">
               <img v-if="movie.poster_path" :src="`https://image.tmdb.org/t/p/w500${movie.poster_path}`" class="w-full aspect-[2/3] object-cover" />
             </div>
-            <div class="flex-1 text-left space-y-6">
-              <div class="flex items-center gap-3 text-primary font-black tracking-widest text-xs uppercase">
+            <div class="flex-1 text-left space-y-4 md:space-y-6 w-full mt-auto">
+              <div class="flex flex-wrap items-center gap-2 md:gap-3 text-primary font-black tracking-widest text-[10px] md:text-xs uppercase">
                 <template v-if="movie.generos" v-for="(genero, index) in movie.generos.split(',')" :key="index">
                   <span>{{ genero.trim() }}</span>
                   <span v-if="index !== movie.generos.split(',').length - 1" class="w-1 h-1 rounded-full bg-on-surface-variant opacity-50"></span>
                 </template>
                 <span v-else>SIN GÉNERO</span>
               </div>
-              <h1 class="text-5xl lg:text-7xl font-black font-headline tracking-tighter leading-none uppercase italic text-on-surface">{{ movie.title }}</h1>
+              <h1 class="text-4xl md:text-5xl lg:text-7xl font-black font-headline tracking-tighter leading-none uppercase italic text-on-surface break-words">{{ movie.title }}</h1>
               
-              <div class="flex items-center gap-4 mt-6 text-slate-300 font-medium text-lg">
-    
-                <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/10">
-                    <span class="material-symbols-outlined text-indigo-400">schedule</span>
+              <div class="flex items-center gap-4 mt-4 md:mt-6 text-slate-300 font-medium text-sm md:text-lg">
+                <div class="flex items-center gap-2 bg-white/5 px-3 py-1.5 md:px-4 md:py-2 rounded-xl border border-white/10">
+                    <span class="material-symbols-outlined text-indigo-400 text-sm md:text-base">schedule</span>
                     <span>{{ movie.runtime }} min</span>
                 </div>
-
-            </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <div class="max-w-screen-2xl mx-auto px-6 lg:px-12 py-16">
-          <div class="flex flex-col lg:flex-row gap-16">
+        <div class="max-w-screen-2xl mx-auto px-4 md:px-6 lg:px-12 py-10 md:py-16">
+          <div class="flex flex-col lg:flex-row gap-10 lg:gap-16">
             
-            <div class="flex-1 space-y-12 text-left">
-              <div class="space-y-4">
-                <h2 class="text-2xl font-black font-headline uppercase tracking-tighter border-l-4 border-primary pl-4 text-on-surface">Sinopsis</h2>
-                <p class="text-lg text-on-surface-variant leading-relaxed font-medium">
+            <div class="flex-1 space-y-8 md:space-y-12 text-left order-2 lg:order-1">
+              <div class="space-y-3 md:space-y-4">
+                <h2 class="text-xl md:text-2xl font-black font-headline uppercase tracking-tighter border-l-4 border-primary pl-3 md:pl-4 text-on-surface">Sinopsis</h2>
+                <p class="text-base md:text-lg text-on-surface-variant leading-relaxed font-medium">
                   {{ movie.synopsis }}
                 </p>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-surface-container-low p-6 rounded-2xl border border-white/5 transition-colors hover:bg-surface-container">
-                  <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant opacity-70 mb-1">Director</p>
-                  <p class="text-lg font-bold font-headline text-on-surface">{{ movie.director }}</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                <div class="bg-surface-container-low p-5 md:p-6 rounded-2xl border border-white/5 transition-colors hover:bg-surface-container">
+                  <p class="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-on-surface-variant opacity-70 mb-1">Director</p>
+                  <p class="text-base md:text-lg font-bold font-headline text-on-surface">{{ movie.director }}</p>
                 </div>
-                <div class="bg-surface-container-low p-6 rounded-2xl border border-white/5 transition-colors hover:bg-surface-container">
-                  <p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant opacity-70 mb-1">Estudio</p>
-                  <p class="text-lg font-bold font-headline text-on-surface">{{ movie.productora ? movie.productora.split(',')[0] : 'Sin estudio' }}</p>
+                <div class="bg-surface-container-low p-5 md:p-6 rounded-2xl border border-white/5 transition-colors hover:bg-surface-container">
+                  <p class="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-on-surface-variant opacity-70 mb-1">Estudio</p>
+                  <p class="text-base md:text-lg font-bold font-headline text-on-surface">{{ movie.productora ? movie.productora.split(',')[0] : 'Sin estudio' }}</p>
                 </div>
               </div>
             </div>
 
-            <div class="w-full lg:w-[400px] shrink-0">
-              <div class="bg-surface-container-low border border-white/5 p-8 rounded-[2.5rem] shadow-2xl space-y-8 text-left">
-                <h3 class="text-2xl font-black font-headline uppercase tracking-tighter italic text-on-surface">Entradas</h3>
+            <div class="w-full lg:w-[400px] shrink-0 order-1 lg:order-2">
+              <div class="bg-surface-container-low border border-white/5 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl space-y-6 md:space-y-8 text-left">
+                <h3 class="text-xl md:text-2xl font-black font-headline uppercase tracking-tighter italic text-on-surface">Entradas</h3>
                 
                 <div class="w-full">
-                  <p class="text-[10px] font-black uppercase text-on-surface-variant opacity-70 mb-3 text-center">Elige el día</p>
+                  <p class="text-[9px] md:text-[10px] font-black uppercase text-on-surface-variant opacity-70 mb-3 text-center md:text-left">Elige el día</p>
                   
-                  <div class="flex justify-start gap-3 overflow-x-auto py-3 px-2 snap-x snap-mandatory
+                  <div class="flex justify-start gap-2 md:gap-3 overflow-x-auto py-2 md:py-3 px-1 snap-x snap-mandatory
                               [&::-webkit-scrollbar]:h-1.5 
                               [&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar-track]:rounded-full 
                               [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full 
-                              hover:[&::-webkit-scrollbar-thumb]:bg-primary pb-4">
+                              hover:[&::-webkit-scrollbar-thumb]:bg-primary pb-3 md:pb-4">
                               
                     <button v-for="dia in proximos7Dias" :key="dia.fecha_completa"
                       @click="fechaSeleccionada = dia.fecha_completa"
                       :class="[
-                        'flex-none snap-center flex flex-col items-center justify-center w-14 h-20 rounded-xl transition-all duration-300 relative', 
+                        'flex-none snap-center flex flex-col items-center justify-center w-12 h-16 md:w-14 md:h-20 rounded-xl transition-all duration-300 relative', 
                         fechaSeleccionada === dia.fecha_completa 
-                          ? 'bg-primary-container text-on-primary-container shadow-[0_10px_30px_rgba(220,38,38,0.4)] scale-110 z-10 ring-2 ring-primary/30' 
+                          ? 'bg-primary-container text-on-primary-container shadow-lg md:shadow-[0_10px_30px_rgba(220,38,38,0.4)] scale-110 z-10 ring-2 ring-primary/30' 
                           : 'bg-surface-container text-on-surface-variant border border-white/5 hover:bg-surface-container-highest z-0 hover:z-10'
                       ]">
-                      <span class="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-1">{{ dia.label }}</span>
-                      <span class="text-xl font-black font-headline">{{ dia.numero }}</span>
+                      <span class="text-[8px] md:text-[10px] font-bold uppercase tracking-widest opacity-80 mb-0.5 md:mb-1">{{ dia.label }}</span>
+                      <span class="text-lg md:text-xl font-black font-headline">{{ dia.numero }}</span>
                     </button>
                     
                   </div>
                 </div>
 
-                <div class="space-y-4">
-                  <p class="text-[10px] font-black uppercase text-on-surface-variant opacity-70">Sesiones disponibles</p>
-                  <div v-if="sesionesFiltradas.length > 0" class="grid grid-cols-2 gap-3">
+                <div class="space-y-3 md:space-y-4">
+                  <p class="text-[9px] md:text-[10px] font-black uppercase text-on-surface-variant opacity-70">Sesiones disponibles</p>
+                  <div v-if="sesionesFiltradas.length > 0" class="grid grid-cols-2 gap-2 md:gap-3">
                     <Link v-for="session in sesionesFiltradas" :key="session.id" :href="`/sesion/${session.id}/asientos`"
-                      class="bg-surface-container text-on-surface border border-white/10 hover:border-primary hover:bg-primary/10 p-4 rounded-xl text-center transition-all group active:scale-95">
-                      <span class="block text-lg font-black font-headline group-hover:text-primary transition-colors">{{ formatearHora(session.start_time) }}</span>
-                      <span class="text-[10px] text-on-surface-variant opacity-70 uppercase font-bold mt-1 block">{{  session.room?.name }}</span>
+                      class="bg-surface-container text-on-surface border border-white/10 hover:border-primary hover:bg-primary/10 p-3 md:p-4 rounded-xl text-center transition-all group active:scale-95">
+                      <span class="block text-base md:text-lg font-black font-headline group-hover:text-primary transition-colors">{{ formatearHora(session.start_time) }}</span>
+                      <span class="text-[9px] md:text-[10px] text-on-surface-variant opacity-70 uppercase font-bold mt-1 block truncate">{{  session.room?.name }}</span>
                     </Link>
                   </div>
-                  <div v-else class="py-10 text-center bg-surface-container-highest/30 rounded-2xl border border-dashed border-white/5 italic text-on-surface-variant">
+                  <div v-else class="py-8 md:py-10 text-center bg-surface-container-highest/30 rounded-2xl border border-dashed border-white/5 italic text-on-surface-variant text-sm md:text-base">
                     No hay sesiones para hoy.
                   </div>
                 </div>
