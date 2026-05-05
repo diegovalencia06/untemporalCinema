@@ -51,7 +51,7 @@ class SessionsTable
             ])
             ->recordActions([
                 Action::make('escanear')
-                    ->label('Escanear Accesos')
+                    ->label('Escanear QR')
                     ->icon('heroicon-m-qr-code')
                     ->color('info')
                     ->url(fn ($record) => route('escanear.vue', ['session_id' => $record->id]))
@@ -117,9 +117,9 @@ class SessionsTable
                     ->color('success')
                     ->url(fn ($record) => route('filament.admin.resources.sessions.orders', ['record' => $record])),
                 DeleteAction::make()
-                    ->label(''),
+                            ->label(''),
                 EditAction::make()
-                ->label('')
+                            ->label('')
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
