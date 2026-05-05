@@ -51,7 +51,7 @@ class SessionsTable
             ])
             ->recordActions([
                 Action::make('escanear')
-                    ->label('Escanear Accesos')
+                    ->label('Escanear QR')
                     ->icon('heroicon-m-qr-code')
                     ->color('info')
                     ->url(fn ($record) => route('escanear.vue', ['session_id' => $record->id]))
