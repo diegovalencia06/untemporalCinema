@@ -116,8 +116,10 @@ class SessionsTable
                     ->icon('heroicon-o-ticket')
                     ->color('success')
                     ->url(fn ($record) => route('filament.admin.resources.sessions.orders', ['record' => $record])),
-                DeleteAction::make(),
+                DeleteAction::make()
+                            ->label(''),
                 EditAction::make()
+                            ->label('')
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
