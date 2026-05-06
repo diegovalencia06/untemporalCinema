@@ -54,6 +54,11 @@ const onScanSuccess = async (decodedText) => {
     if (!isScanning.value || !canProcessScan.value) return;
     
     isScanning.value = false;
+    
+    // AÑADE ESTAS DOS LÍNEAS AQUÍ:
+    scanResult.value = 'loading'; 
+    scanMessage.value = 'Verificando entrada...'; 
+
     scanner.clear();
 
     try {
@@ -106,26 +111,30 @@ const resetear = async () => {
 
             <div v-else class="p-10 flex flex-col items-center text-center transition-all"
                  :class="{
+                     'bg-blue-600': scanResult === 'loading', /* NUEVO COLOR PARA CARGA */
                      'bg-green-500': scanResult === 'ok',
                      'bg-yellow-400 text-black': scanResult === 'used',
                      'bg-red-600': scanResult === 'invalid'
                  }">
                 
-                <span class="material-symbols-outlined text-7xl mb-4 font-black">
-                    {{ scanResult === 'ok' ? 'check_circle' : (scanResult === 'used' ? 'warning' : 'cancel') }}
+                <!-- SE AÑADE EL ICONO DE 'sync' Y LA ANIMACIÓN DE GIRO -->
+                <span class="material-symbols-outlined text-7xl mb-4 font-black" :class="{'animate-spin': scanResult === 'loading'}">
+                    {{ scanResult === 'loading' ? 'sync' : (scanResult === 'ok' ? 'check_circle' : (scanResult === 'used' ? 'warning' : 'cancel')) }}
                 </span>
                 
+                <!-- SE AÑADE EL TEXTO DE 'CARGANDO...' -->
                 <h2 class="text-4xl font-black uppercase tracking-widest mb-4">
-                    {{ scanResult === 'ok' ? 'OK - ADELANTE' : (scanResult === 'used' ? 'YA USADO' : 'NO VÁLIDO') }}
+                    {{ scanResult === 'loading' ? 'CARGANDO...' : (scanResult === 'ok' ? 'OK - ADELANTE' : (scanResult === 'used' ? 'YA USADO' : 'NO VÁLIDO')) }}
                 </h2>
                 
                 <p class="text-xl font-bold opacity-90">{{ scanMessage }}</p>
 
-                <div v-if="seatInfo" class="mt-6 px-6 py-2 bg-black/20 rounded-full font-mono text-2xl font-bold">
+                <!-- OCULTAMOS ASIENTO Y BOTÓN MIENTRAS CARGA -->
+                <div v-if="seatInfo && scanResult !== 'loading'" class="mt-6 px-6 py-2 bg-black/20 rounded-full font-mono text-2xl font-bold">
                     Asiento: {{ seatInfo }}
                 </div>
 
-                <button @click="resetear" 
+                <button v-if="scanResult !== 'loading'" @click="resetear" 
                         class="mt-10 px-8 py-4 bg-black/30 hover:bg-black/50 text-white rounded-xl font-bold uppercase tracking-widest transition-all">
                     Escanear Siguiente
                 </button>
