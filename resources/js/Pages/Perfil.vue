@@ -160,14 +160,6 @@ const statsGeneros = computed(() => {
                         {{ reserva.nota_media_global > 0 ? reserva.nota_media_global : 'N/A' }}
                     </span>
                 </div>
-                
-                <!-- Espectadores -->
-                <div class="bg-black/60 backdrop-blur-md px-2 py-1 rounded-md border border-white/10 flex items-center gap-1">
-                    <span class="material-symbols-outlined text-red-400 text-xs">group</span>
-                    <span class="text-[10px] font-bold text-white">
-                        {{ reserva.espectadores_globales || 0 }}
-                    </span>
-                </div>
             </div>
         </div>
 
